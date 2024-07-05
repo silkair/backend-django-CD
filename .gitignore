@@ -1,0 +1,20 @@
+backend/.env
+
+mysettings.py
+*.log
+
+/logging/django.log
+
+backend/.erlang.cookie
+
+# pycharm
+.idea
+
+# cpython
+__pycache__/
+*.pyc
+
+django_backend/.env
+db/.env
+
+venvs
