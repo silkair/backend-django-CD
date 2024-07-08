@@ -26,6 +26,7 @@ urlpatterns = [
 
     # Add more URL patterns here as needed
     path('api/v1/nicknames/', include('user.urls')),
+    path('api/v1/banners/', include('banner.urls')),
 ]
 
 urlpatterns += [
