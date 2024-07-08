@@ -16,7 +16,7 @@ class ImageSerializer(serializers.ModelSerializer):
         model = Image
         fields = ['id', 'user', 'created_at', 'updated_at', 'is_deleted', 'image_url', 'file']
         #이미지url은 읽기 전용으로 생성
-        read_only_fields = ('image_url',)
+        read_only_fields = ('image_url', 'created_at', 'updated_at')  # 읽기 전용 필드 추가
 
     def validate_file(self, value):
         """
