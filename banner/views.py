@@ -58,8 +58,14 @@ def create_banner(request):
             ad_text=ad_text
         )
 
-        return Response({"code": 201, "message": "배너 생성 성공", "data": BannerSerializer(banner).data},
-                        status=status.HTTP_201_CREATED)
+        response_data = {
+            "code": 201,
+            "message": "배너 생성 성공",
+            "data": BannerSerializer(banner).data,
+            "ad_text": ad_text  # 생성된 광고 문구를 response에 추가
+        }
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
     return Response({"code": 400, "message": "배너 생성 실패", "errors": serializer.errors},
                     status=status.HTTP_400_BAD_REQUEST)
@@ -127,7 +133,13 @@ def update_banner(request, banner_id):
         banner.ad_text = ad_text
         banner.save()
 
-        return Response({"code": 200, "message": "배너 수정 성공"}, status=status.HTTP_200_OK)
+        response_data = {
+            "code": 200,
+            "message": "배너 수정 성공",
+            "data": BannerDetailSerializer(banner).data,
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
     return Response({"code": 400, "message": "배너 수정 실패", "errors": serializer.errors},
                     status=status.HTTP_400_BAD_REQUEST)
