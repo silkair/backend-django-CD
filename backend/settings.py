@@ -1,14 +1,17 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 import environ
 import pymysql
 
+load_dotenv()
 pymysql.install_as_MySQLdb()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 env.read_env()
 SECRET_KEY = env('SECRET_KEY')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 # Quick-start development settings - unsuitable for production
 # See <https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/>
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -26,6 +29,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'user',
+    'banner',
     'storages',
     'image',
 ]
