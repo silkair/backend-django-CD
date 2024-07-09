@@ -18,3 +18,5 @@ django_backend/.env
 db/.env
 
 venvs
+
+debug.log
