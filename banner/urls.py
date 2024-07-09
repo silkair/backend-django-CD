@@ -1,10 +1,7 @@
 from django.urls import path
-from .views import create_banner, get_banner, update_banner, delete_banner
+from .views import create_banner, handle_banner
 
 urlpatterns = [
-    path('', create_banner),
-    path('<int:banner_id>/', get_banner),
-    path('<int:banner_id>/update/', update_banner),
-
-    path('<int:banner_id>/delete/', delete_banner),
+    path('', create_banner, name='create_banner'),  # POST 요청을 통한 배너 생성
+    path('<int:banner_id>/', handle_banner, name='handle_banner'),  # GET, PUT, DELETE 요청을 통한 배너 조회, 수정, 삭제
 ]
