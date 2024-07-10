@@ -4,14 +4,15 @@ from .models import Banner
 class BannerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Banner
-        fields = ['item_name', 'item_concept']
+        fields = ['item_name', 'item_concept', 'item_category', 'image_id', 'user_id']
+
 
 class BannerDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Banner
-        fields = ['id', 'item_name', 'item_concept', 'ad_text', 'created_at']
+        fields = '__all__'
 
 class BannerUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Banner
-        fields = ['item_name', 'item_concept']
+        fields = ['item_name', 'item_concept', 'item_category','image_id', 'user_id']
