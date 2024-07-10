@@ -28,6 +28,7 @@ urlpatterns = [
     path('api/v1/nicknames/', include('user.urls')),
     path('api/v1/banners/', include('banner.urls')),
     path('api/v1/', include('image.urls')),
+    path('api/v1/', include('background.urls')),
 ]
 
 urlpatterns += [

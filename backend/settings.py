@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'banner',
     'storages',
     'image',
+    'background'
 ]
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -123,3 +124,6 @@ AWS_QUERYSTRING_AUTH = False
 
 # 파일 저장 시 S3 를 디폴드 값으로 설정
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# 외부 API 설정
+DRAPHART_API_KEY = env('DRAPHART_API_KEY')

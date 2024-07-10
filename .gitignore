@@ -19,6 +19,11 @@ db/.env
 
 venvs
 
+venv
 debug.log
 
+
+
+
 .venv
+
