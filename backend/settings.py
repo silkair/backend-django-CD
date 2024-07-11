@@ -134,9 +134,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-# 외부 API 설정
-DRAPHART_API_KEY = env('DRAPHART_API_KEY')
-
 # Celery settings
 CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672'
 CELERY_RESULT_BACKEND = 'django-db'
@@ -146,3 +143,5 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Seoul'
 
 OPENAI_API_KEY = env('OPENAI_API_KEY')
+DRAPHART_USER_NAME = env('DRAPHART_USER_NAME')
+
