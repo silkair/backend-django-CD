@@ -30,9 +30,7 @@ INSTALLED_APPS = [
     'storages',
     'image',
     'background',
-
-    'recreated_background'
-
+    'recreated_background',
     'banner',
     'django_celery_results',  # Celery 결과 백엔드 추가
 
@@ -147,7 +145,11 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Seoul'
 
+# 환경 변수 로드
+env = environ.Env()
+environ.Env.read_env()
+
 OPENAI_API_KEY = env('OPENAI_API_KEY')
 
-DRAPHART_USER_NAME = env('DRAPHART_USER_NAME')
+DRAPHART_API_KEY= env('DRAPHART_API_KEY')
 
