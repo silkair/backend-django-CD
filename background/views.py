@@ -30,10 +30,10 @@ GEN_TYPES = ['remove_bg', 'color_bg', 'simple', 'concept']
             'user_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='User ID'),
             'image_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Image ID'),
             'gen_type': openapi.Schema(type=openapi.TYPE_STRING, description='Generation Type', enum=['remove_bg', 'color_bg', 'simple', 'concept']),
-            'multiblob_sod': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Multiblob SOD', default=False),
+            #'multiblob_sod': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Multiblob SOD', default=False),
             'output_w': openapi.Schema(type=openapi.TYPE_INTEGER, description='Output Width', default=1000, minimum=200, maximum=2000),
             'output_h': openapi.Schema(type=openapi.TYPE_INTEGER, description='Output Height', default=1000, minimum=200, maximum=2000),
-            'bg_color_hex_code': openapi.Schema(type=openapi.TYPE_STRING, description='Background Color Hex Code', default='#FFFFFF', pattern='^#(?:[0-9a-fA-F]{3}){1,2}$'),
+            #'bg_color_hex_code': openapi.Schema(type=openapi.TYPE_STRING, description='Background Color Hex Code', default='#FFFFFF', pattern='^#(?:[0-9a-fA-F]{3}){1,2}$'),
             'concept_option': openapi.Schema(type=openapi.TYPE_OBJECT, description='Concept Option', properties={
                 'category': openapi.Schema(type=openapi.TYPE_STRING, description='Category', enum=['cosmetics', 'food', 'clothes', 'person', 'car', 'others']),
                 'theme': openapi.Schema(type=openapi.TYPE_STRING, description='Theme'),
@@ -55,10 +55,10 @@ def backgrounds_view(request):
     image_id = request.data.get('image_id')
     #username = request.data.get('username')
     gen_type = request.data.get('gen_type')
-    multiblob_sod = request.data.get('multiblob_sod', False)
+    #multiblob_sod = request.data.get('multiblob_sod', False)
     output_h = request.data.get('output_h', 1000)
     output_w = request.data.get('output_w', 1000)
-    bg_color_hex_code = request.data.get('bg_color_hex_code', '#FFFFFF')
+    #bg_color_hex_code = request.data.get('bg_color_hex_code', '#FFFFFF')
     concept_option = request.data.get('concept_option', {})
 
     logger.debug("Received request data: %s", request.data)
@@ -110,10 +110,10 @@ def backgrounds_view(request):
     data = {
         "username": settings.DRAPHART_USER_NAME,
         "gen_type": gen_type,
-        "multiblob_sod": multiblob_sod,
+        "multiblob_sod": settings.DRAPHART_MULTIBLOD_SOD,
         "output_w": output_w,
         "output_h": output_h,
-        "bg_color_hex_code": bg_color_hex_code,
+        "bg_color_hex_code": settings.DRAPHART_BD_COLOR_HEX_CODE,
         'concept_option': json.dumps(concept_option),
     }
 
@@ -217,7 +217,7 @@ def background_manage(request, background_id):
 
         output_w = background.output_w
         output_h = background.output_h
-        bg_color_hex_code = request.data.get('bg_color_hex_code', '#FFFFFF')
+        #bg_color_hex_code = request.data.get('bg_color_hex_code', '#FFFFFF')
 
         # 이미지 테이블에 있는 사용자가 업로드한 사진의 URL을 다운로드
         image_url = image.image_url
@@ -243,10 +243,10 @@ def background_manage(request, background_id):
         data = {
             "username": settings.DRAPHART_USER_NAME,
             "gen_type": gen_type,
-            "multiblob_sod": False,
+            "multiblob_sod": settings.DRAPHART_MULTIBLOD_SOD,
             "output_w": output_w,
             "output_h": output_h,
-            "bg_color_hex_code": bg_color_hex_code,
+            "bg_color_hex_code": settings.DRAPHART_BD_COLOR_HEX_CODE,
             'concept_option': json.dumps(concept_option),
         }
 

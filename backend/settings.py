@@ -30,9 +30,7 @@ INSTALLED_APPS = [
     'storages',
     'image',
     'background',
-
-    'recreated_background'
-
+    'recreated_background',
     'banner',
     'django_celery_results',  # Celery 결과 백엔드 추가
 
@@ -149,5 +147,9 @@ CELERY_TIMEZONE = 'Asia/Seoul'
 
 OPENAI_API_KEY = env('OPENAI_API_KEY')
 
+DRAPHART_API_KEY = env('DRAPHART_API_KEY')
 DRAPHART_USER_NAME = env('DRAPHART_USER_NAME')
+DRAPHART_MULTIBLOD_SOD= env('DRAPHART_MULTIBLOD_SOD')
+DRAPHART_BD_COLOR_HEX_CODE= env('DRAPHART_BD_COLOR_HEX_CODE')
+
 
