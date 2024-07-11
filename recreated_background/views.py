@@ -135,3 +135,46 @@ def recreate_background_view(request):
     # 성공적으로 저장되었음을 클라이언트에게 반환
     serializer = RecreatedBackgroundSerializer(recreated_background)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+@swagger_auto_schema(
+    method='get',
+    operation_id='재생성된 이미지 조회',
+    operation_description='재생성된 이미지를 조회합니다.',
+    tags=['Recreated Background'],
+    responses={
+        200: RecreatedBackgroundSerializer,
+        404: "Recreated Background not found.",
+    }
+)
+@swagger_auto_schema(
+    method='delete',
+    operation_id='재생성된 이미지 삭제',
+    operation_description='재생성된 이미지를 삭제합니다.',
+    tags=['Recreated Background'],
+    responses={
+        200: openapi.Response("Image deleted successfully."),
+        404: "Recreated Background not found.",
+    }
+)
+@api_view(['GET', 'DELETE'])
+def recreated_background_manage(request, recreated_background_id):
+    try:
+        recreated_background = RecreatedBackground.objects.get(id=recreated_background_id)
+    except RecreatedBackground.DoesNotExist:
+        return Response({"error": "해당 재생성된 배경 이미지가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serializer = RecreatedBackgroundSerializer(recreated_background)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == 'DELETE':
+        s3 = boto3.client('s3', region_name=settings.AWS_S3_REGION_NAME)
+        file_key = recreated_background.image_url.split('/')[-1]
+        try:
+            s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=file_key)
+        except Exception as e:
+            logger.error("S3 파일 삭제 오류: %s", e)
+            return Response({"error": "S3 파일 삭제 오류", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        recreated_background.delete()
+        return Response({"message": "Image deleted successfully."}, status=status.HTTP_200_OK)
