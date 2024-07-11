@@ -15,7 +15,7 @@ load_dotenv()
 # OpenAI API 키 설정
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
-def generate_ad_text(item_name, item_concept, item_category):
+def generate_ad_text(item_name, item_concept, item_category, add_information):
     headers = {
         'Authorization': f'Bearer {openai_api_key}',
         'Content-Type': 'application/json'
@@ -23,8 +23,8 @@ def generate_ad_text(item_name, item_concept, item_category):
     data = {
         "model": "gpt-3.5-turbo",
         "messages": [
-            {"role": "system", "content": "You are a creative copywriter."},
-            {"role": "user", "content": f"'{item_name}' 제품의 광고 문구를 '{item_concept}' 개념으로 '{item_category}' 카테고리에서 한국어로 작성해 주세요."}
+            {"role": "system", "content": "당신은 창의적인 카피라이터입니다."},
+            {"role": "user", "content": f"'{item_name}' 제품의 광고 문구를 '{item_concept}' 개념으로 '{item_category}' 카테고리에서 '{add_information}' 정보를 추가하여 한국어로 작성해 주세요."}
         ],
         "max_tokens": 50  # 토큰 크기를 50으로 고정
     }
@@ -32,6 +32,24 @@ def generate_ad_text(item_name, item_concept, item_category):
     response_json = response.json()
     ad_text = response_json['choices'][0]['message']['content'].strip()
     return ad_text
+
+def generate_serve_text(ad_text):
+    headers = {
+        'Authorization': f'Bearer {openai_api_key}',
+        'Content-Type': 'application/json'
+    }
+    data = {
+        "model": "gpt-3.5-turbo",
+        "messages": [
+            {"role": "system", "content": "당신은 창의적인 카피라이터입니다."},
+            {"role": "user", "content": f"다음 메인 광고글을 광고하는 서브 광고글을 한국어로 작성해 주세요: '{ad_text}'"}
+        ],
+        "max_tokens": 50  # 토큰 크기를 50으로 고정
+    }
+    response = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=data)
+    response_json = response.json()
+    serve_text = response_json['choices'][0]['message']['content'].strip()
+    return serve_text
 
 @swagger_auto_schema(
     method='post',
@@ -52,23 +70,28 @@ def create_banner(request):
         item_category = serializer.validated_data.get('item_category')
         user_id = serializer.validated_data.get('user_id')
         image_id = serializer.validated_data.get('image_id')
+        add_information = serializer.validated_data.get('add_information')
 
-        ad_text = generate_ad_text(item_name, item_concept, item_category)
+        ad_text = generate_ad_text(item_name, item_concept, item_category, add_information)
+        serve_text = generate_serve_text(ad_text)
 
         banner = Banner.objects.create(
             item_name=item_name,
             item_concept=item_concept,
             item_category=item_category,
             ad_text=ad_text,
+            serve_text=serve_text,
             user_id=user_id,
-            image_id=image_id
+            image_id=image_id,
+            add_information=add_information
         )
 
         response_data = {
             "code": 201,
             "message": "배너 생성 성공",
             "data": BannerSerializer(banner).data,
-            "ad_text": ad_text  # 생성된 광고 문구를 response에 추가
+            "ad_text": ad_text,  # 생성된 광고 문구를 response에 추가
+            "serve_text": serve_text  # 생성된 서브 광고 문구를 response에 추가
         }
 
         return Response(response_data, status=status.HTTP_201_CREATED)
@@ -93,6 +116,7 @@ def create_banner(request):
                         "item_concept": "중국산",
                         "item_category": "전자제품",
                         "ad_text": "에어팟 프로2를 소개합니다! 이제 중국산 품질로 만나보세요.",
+                        "serve_text": "에어팟 프로2 광고를 확인해 보세요!",
                         "created_at": "2023-01-01T00:00:00Z"
                     }
                 }
@@ -139,15 +163,19 @@ def handle_banner(request, banner_id):
             item_category = serializer.validated_data.get('item_category')
             user_id = serializer.validated_data.get('user_id')
             image_id = serializer.validated_data.get('image_id')
+            add_information = serializer.validated_data.get('add_information')
 
-            ad_text = generate_ad_text(item_name, item_concept, item_category)
+            ad_text = generate_ad_text(item_name, item_concept, item_category, add_information)
+            serve_text = generate_serve_text(ad_text)
 
             banner.item_name = item_name
             banner.item_concept = item_concept
             banner.item_category = item_category
             banner.ad_text = ad_text
+            banner.serve_text = serve_text
             banner.user_id = user_id
             banner.image_id = image_id
+            banner.add_information = add_information
             banner.save()
 
             response_data = {
