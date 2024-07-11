@@ -30,8 +30,12 @@ INSTALLED_APPS = [
     'storages',
     'image',
     'background',
+
+    'recreated_background'
+
     'banner',
     'django_celery_results',  # Celery 결과 백엔드 추가
+
 ]
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -125,6 +129,7 @@ AWS_QUERYSTRING_AUTH = False
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 
+
 # DRF 설정
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': (
@@ -134,7 +139,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-# Celery settings
+
 CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672'
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_ACCEPT_CONTENT = ['json']
@@ -143,5 +148,6 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Seoul'
 
 OPENAI_API_KEY = env('OPENAI_API_KEY')
+
 DRAPHART_USER_NAME = env('DRAPHART_USER_NAME')
 
