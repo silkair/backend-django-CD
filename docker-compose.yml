@@ -23,19 +23,36 @@ services:
     restart: always
     depends_on:
       - mysqldb
+      - rabbitmq
     command: >
-      bash -c "
-      python wait_mysql.py && python manage.py makemigrations && python manage.py migrate &&
+      bash -c "python wait_mysql.py &&
+      python manage.py makemigrations &&
+      python manage.py migrate &&
       python manage.py runserver 0.0.0.0:8000"
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    links:
-      - mysqldb:mysql
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: rabbitmq
     ports:
-      - "8001:80"
-    environment:
-      PMA_HOST: mysqldb
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: celery
+    volumes:
+      - ./:/app
+    depends_on:
+      - backend
+      - rabbitmq
+    command: celery -A backend worker --loglevel=info --uid=nobody
+
+
+
 volumes:
   mysql_data:
-
+  rabbitmq_data:

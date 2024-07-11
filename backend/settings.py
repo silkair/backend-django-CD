@@ -1,17 +1,15 @@
 from pathlib import Path
 import os
-from dotenv import load_dotenv
 import environ
 import pymysql
 
-load_dotenv()
+
 pymysql.install_as_MySQLdb()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 env.read_env()
 SECRET_KEY = env('SECRET_KEY')
-#OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 OPENAI_API_KEY = env('OPENAI_API_KEY')
 # Quick-start development settings - unsuitable for production
 # See <https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/>
@@ -30,10 +28,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'user',
-    'banner',
     'storages',
     'image',
-    'background'
+    'background',
+    'recreated_background',
+    'banner',
+    'django_celery_results',  # Celery 결과 백엔드 추가
+
 ]
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -126,5 +127,34 @@ AWS_QUERYSTRING_AUTH = False
 # 파일 저장 시 S3 를 디폴드 값으로 설정
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-# 외부 API 설정
+
+
+# DRF 설정
+REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.MultiPartParser',
+        'rest_framework.parsers.FormParser',
+    ),
+}
+
+
+CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Seoul'
+
+# 환경 변수 로드
+env = environ.Env()
+environ.Env.read_env()
+
+OPENAI_API_KEY = env('OPENAI_API_KEY')
+
+
 DRAPHART_API_KEY = env('DRAPHART_API_KEY')
+DRAPHART_USER_NAME = env('DRAPHART_USER_NAME')
+DRAPHART_MULTIBLOD_SOD= env('DRAPHART_MULTIBLOD_SOD')
+DRAPHART_BD_COLOR_HEX_CODE= env('DRAPHART_BD_COLOR_HEX_CODE')
+

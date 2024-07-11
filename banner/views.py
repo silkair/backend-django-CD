@@ -7,13 +7,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Banner
 from .serializers import BannerSerializer, BannerDetailSerializer, BannerUpdateSerializer
-from dotenv import load_dotenv
-
-# .env 파일에서 환경 변수 로드
-load_dotenv()
+from django.conf import settings
 
 # OpenAI API 키 설정
-openai_api_key = os.getenv("OPENAI_API_KEY")
+openai_api_key = settings.OPENAI_API_KEY
 
 def generate_ad_text(item_name, item_concept, item_category, add_information):
     headers = {
