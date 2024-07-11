@@ -32,7 +32,8 @@ INSTALLED_APPS = [
     'banner',
     'storages',
     'image',
-    'background'
+    'background',
+    'recreated_background'
 ]
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -128,11 +129,4 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # 외부 API 설정
 DRAPHART_API_KEY = env('DRAPHART_API_KEY')
 
-#DRAPHART_USER_NAME = env('DRAPHART_USER_NAME')
-
-#DRAPHART_USER_NAME = os.getenv('DRAPHART_USER_NAME', 'default_username')
-
-# Initialise environment variables
-env = environ.Env()
-environ.Env.read_env()
 DRAPHART_USER_NAME = env('DRAPHART_USER_NAME')
