@@ -3,18 +3,13 @@ import os
 import environ
 import pymysql
 
-
 pymysql.install_as_MySQLdb()
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 env.read_env()
 SECRET_KEY = env('SECRET_KEY')
 OPENAI_API_KEY = env('OPENAI_API_KEY')
-# Quick-start development settings - unsuitable for production
-# See <https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/>
-# SECURITY WARNING: keep the secret key used in production secret!
-# SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = True
 ALLOWED_HOSTS = []
 # Application definition
@@ -33,9 +28,10 @@ INSTALLED_APPS = [
     'background',
     'recreated_background',
     'banner',
-    'django_celery_results',  # Celery 결과 백엔드 추가
-
+    'django_celery_results',
+    'django_redis',
 ]
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -85,6 +81,7 @@ DATABASES = {
         'PASSWORD': env('DATABASE_PASS'),
         'HOST': env('DATABASE_HOST'),
         'PORT': '3306',
+        'CONN_MAX_AGE': 0,  # 매 쿼리마다 새로운 커넥션을 생성
     }
 }
 # Password validation
@@ -127,8 +124,6 @@ AWS_QUERYSTRING_AUTH = False
 # 파일 저장 시 S3 를 디폴드 값으로 설정
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-
-
 # DRF 설정
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': (
@@ -138,23 +133,40 @@ REST_FRAMEWORK = {
     ),
 }
 
-
-CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672'
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Asia/Seoul'
-
-# 환경 변수 로드
-env = environ.Env()
-environ.Env.read_env()
-
 OPENAI_API_KEY = env('OPENAI_API_KEY')
-
 
 DRAPHART_API_KEY = env('DRAPHART_API_KEY')
 DRAPHART_USER_NAME = env('DRAPHART_USER_NAME')
 DRAPHART_MULTIBLOD_SOD= env('DRAPHART_MULTIBLOD_SOD')
 DRAPHART_BD_COLOR_HEX_CODE= env('DRAPHART_BD_COLOR_HEX_CODE')
+
+#Redis를 쓰고 싶다면!
+#CELERY_BROKER_URL = 'redis://redis:6379/0'
+#CELERY_RESULT_BACKEND = 'django-cache'
+
+#RabbiMQ를 쓰고싶다면!!
+CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//' #여기서 guest:guest 는 아이디:비밀번호
+CELERY_RESULT_BACKEND = 'django-db'  # 작업 결과를 Django 데이터베이스에 저장
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Seoul'
+CELERY_CACHE_BACKEND = 'default'
+
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False  # Celery가 root logger를 hijack하지 않도록 설정
+
+# 워커 유지 시간을 설정
+CELERYD_TASK_TIME_LIMIT = 300  # 작업 제한 시간 설정 (초)
+CELERYD_TASK_SOFT_TIME_LIMIT = 270  # 소프트 제한 시간 설정 (초)
+
+# Redis settings for Django cache
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://redis:6379/1',  # Redis 서버 위치
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
 

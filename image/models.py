@@ -10,4 +10,3 @@ class Image(models.Model):
 
     def __str__(self):
         return f"Image {self.id} by User {self.user.nickname}"
-
