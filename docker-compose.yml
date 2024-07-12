@@ -24,6 +24,7 @@ services:
     depends_on:
       - mysqldb
       - rabbitmq
+      - redis
     command: >
       bash -c "python wait_mysql.py &&
       python manage.py makemigrations &&
@@ -39,6 +40,12 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+
   celery:
     build:
       context: ./backend
@@ -49,9 +56,8 @@ services:
     depends_on:
       - backend
       - rabbitmq
+      - redis
     command: celery -A backend worker --loglevel=info --uid=nobody
-
-
 
 volumes:
   mysql_data:
