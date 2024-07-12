@@ -10,12 +10,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Banner, UserInteraction
 from .serializers import BannerSerializer, BannerDetailSerializer, BannerUpdateSerializer
-<<<<<<< Updated upstream
 from django.conf import settings
 
 # OpenAI API 키 설정
 openai_api_key = settings.OPENAI_API_KEY
-=======
 from dotenv import load_dotenv
 from django.core.cache import cache
 import environ
@@ -27,7 +25,6 @@ environ.Env.read_env()
 
 # OpenAI API 키 설정
 openai_api_key = env("OPENAI_API_KEY")
->>>>>>> Stashed changes
 
 # 로깅 설정
 logger = logging.getLogger(__name__)
