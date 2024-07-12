@@ -25,10 +25,11 @@ logger = logging.getLogger(__name__)
     tags=['Image Resize'],
     request_body=BackgroundImageResizingSerializer,
     responses={
-        200: openapi.Response('리사이징된 이미지 URL 반환', openapi.Schema(
+        200: openapi.Response('리사이징된 이미지 URL 및 ID 반환', openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'resized_image_url': openapi.Schema(type=openapi.TYPE_STRING, description='리사이징된 이미지 URL')
+                'resized_image_url': openapi.Schema(type=openapi.TYPE_STRING, description='리사이징된 이미지 URL'),
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='리사이징된 이미지 ID')
             }
         )),
         400: 'Bad Request',
@@ -62,14 +63,14 @@ def resize_background_image_view(request):
             s3.upload_fileobj(resized_image_bytes, settings.AWS_STORAGE_BUCKET_NAME, unique_filename, ExtraArgs={'ContentType': 'image/png'})
             resized_image_url = f"http://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{unique_filename}"
 
-            ImageResizing.objects.create(
+            image_resizing = ImageResizing.objects.create(
                 background=background,
                 width=width,
                 height=height,
                 image_url=resized_image_url
             )
 
-            return Response({"resized_image_url": resized_image_url}, status=status.HTTP_200_OK)
+            return Response({"resized_image_url": resized_image_url, "id": image_resizing.id}, status=status.HTTP_200_OK)
 
         except requests.RequestException as e:
             logger.error("Failed to download image: %s", e)
@@ -87,10 +88,11 @@ def resize_background_image_view(request):
     tags=['Image Resize'],
     request_body=RecreatedBackgroundImageResizingSerializer,
     responses={
-        200: openapi.Response('리사이징된 이미지 URL 반환', openapi.Schema(
+        200: openapi.Response('리사이징된 이미지 URL 및 ID 반환', openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'resized_image_url': openapi.Schema(type=openapi.TYPE_STRING, description='리사이징된 이미지 URL')
+                'resized_image_url': openapi.Schema(type=openapi.TYPE_STRING, description='리사이징된 이미지 URL'),
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='리사이징된 이미지 ID')
             }
         )),
         400: 'Bad Request',
@@ -124,14 +126,14 @@ def resize_recreated_background_image_view(request):
             s3.upload_fileobj(resized_image_bytes, settings.AWS_STORAGE_BUCKET_NAME, unique_filename, ExtraArgs={'ContentType': 'image/png'})
             resized_image_url = f"http://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{unique_filename}"
 
-            ImageResizing.objects.create(
+            image_resizing = ImageResizing.objects.create(
                 recreated_background=recreated_background,
                 width=width,
                 height=height,
                 image_url=resized_image_url
             )
 
-            return Response({"resized_image_url": resized_image_url}, status=status.HTTP_200_OK)
+            return Response({"resized_image_url": resized_image_url, "id": image_resizing.id}, status=status.HTTP_200_OK)
 
         except requests.RequestException as e:
             logger.error("Failed to download image: %s", e)
@@ -141,3 +143,90 @@ def resize_recreated_background_image_view(request):
             return Response({"error": "Failed to resize image"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(
+    method='get',
+    operation_id='생성된 이미지 리사이징 조회',
+    operation_description='생성된 이미지를 리사이징한 결과를 조회합니다.',
+    tags=['Image Resize'],
+    responses={
+        200: BackgroundImageResizingSerializer,
+        404: "Image not found.",
+    }
+)
+@swagger_auto_schema(
+    method='delete',
+    operation_id='생성된 이미지 리사이징 삭제',
+    operation_description='생성된 이미지를 리사이징한 결과를 삭제합니다.',
+    tags=['Image Resize'],
+    responses={
+        200: openapi.Response("Image deleted successfully."),
+        404: "Image not found.",
+    }
+)
+@api_view(['GET', 'DELETE'])
+def background_image_manage(request, background_image_id):
+    try:
+        image_resizing = ImageResizing.objects.get(id=background_image_id)
+    except ImageResizing.DoesNotExist:
+        return Response({"error": "해당 이미지가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serializer = BackgroundImageResizingSerializer(image_resizing)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == 'DELETE':
+        s3 = boto3.client('s3', region_name=settings.AWS_S3_REGION_NAME)
+        file_key = image_resizing.image_url.split('/')[-1]
+        try:
+            s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=file_key)
+        except Exception as e:
+            logger.error("S3 파일 삭제 오류: %s", e)
+            return Response({"error": "S3 파일 삭제 오류", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        image_resizing.delete()
+        return Response({"message": "Image deleted successfully."}, status=status.HTTP_200_OK)
+
+
+@swagger_auto_schema(
+    method='get',
+    operation_id='재생성 이미지 리사이징 조회',
+    operation_description='재생성되어 리사이징을 거친 사진을 조회합니다.',
+    tags=['Image Resize'],
+    responses={
+        200: RecreatedBackgroundImageResizingSerializer,
+        404: "Image not found.",
+    }
+)
+@swagger_auto_schema(
+    method='delete',
+    operation_id='재생성 이미지 리사이징 삭제',
+    operation_description='재생성되어 리사이징을 거친 사진을 삭제합니다.',
+    tags=['Image Resize'],
+    responses={
+        200: openapi.Response("Image deleted successfully."),
+        404: "Image not found.",
+    }
+)
+@api_view(['GET', 'DELETE'])
+def recreated_background_image_manage(request, recreated_background_image_id):
+    try:
+        image_resizing = ImageResizing.objects.get(id=recreated_background_image_id)
+    except ImageResizing.DoesNotExist:
+        return Response({"error": "해당 이미지가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serializer = RecreatedBackgroundImageResizingSerializer(image_resizing)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == 'DELETE':
+        s3 = boto3.client('s3', region_name=settings.AWS_S3_REGION_NAME)
+        file_key = image_resizing.image_url.split('/')[-1]
+        try:
+            s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=file_key)
+        except Exception as e:
+            logger.error("S3 파일 삭제 오류: %s", e)
+            return Response({"error": "S3 파일 삭제 오류", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        image_resizing.delete()
+        return Response({"message": "Image deleted successfully."}, status=status.HTTP_200_OK)
