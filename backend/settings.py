@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'background',
     'recreated_background',
     'banner',
+    'image_resizing',
     'django_celery_results',  # Celery 결과 백엔드 추가
 
 ]
