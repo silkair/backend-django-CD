@@ -1,3 +1,5 @@
+# models.py
+
 from django.db import models
 from user.models import User
 from image.models import Image
@@ -15,3 +17,8 @@ class Banner(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_deleted = models.BooleanField(default=False)
+
+class UserInteraction(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    interaction_data = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)

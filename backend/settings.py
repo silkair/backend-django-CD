@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'banner',
     'django_celery_results',
     'django_redis',
+    'image_resizing',
 ]
 
 MIDDLEWARE = [
@@ -152,10 +153,8 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Seoul'
 CELERY_CACHE_BACKEND = 'default'
-
 CELERY_WORKER_HIJACK_ROOT_LOGGER = False  # Celery가 root logger를 hijack하지 않도록 설정
 
-# 워커 유지 시간을 설정
 CELERYD_TASK_TIME_LIMIT = 300  # 작업 제한 시간 설정 (초)
 CELERYD_TASK_SOFT_TIME_LIMIT = 270  # 소프트 제한 시간 설정 (초)
 
