@@ -151,8 +151,6 @@ CELERY_TIMEZONE = 'Asia/Seoul'
 env = environ.Env()
 environ.Env.read_env()
 
-OPENAI_API_KEY = env('OPENAI_API_KEY')
-
 
 DRAPHART_API_KEY = env('DRAPHART_API_KEY')
 DRAPHART_USER_NAME = env('DRAPHART_USER_NAME')
