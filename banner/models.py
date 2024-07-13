@@ -1,5 +1,3 @@
-# models.py
-
 from django.db import models
 from user.models import User
 from image.models import Image
