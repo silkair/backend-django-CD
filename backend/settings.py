@@ -16,7 +16,9 @@ OPENAI_API_KEY = env('OPENAI_API_KEY')
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost',
+    '127.0.0.1',
+    'backend',]
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -35,9 +37,10 @@ INSTALLED_APPS = [
     'banner',
     'image_resizing',
     'django_celery_results',  # Celery 결과 백엔드 추가
-
+    'django_prometheus',
 ]
 MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -46,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
