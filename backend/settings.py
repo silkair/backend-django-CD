@@ -30,17 +30,16 @@ INSTALLED_APPS = [
     'background',
     'recreated_background',
     'banner',
-    'django_celery_results',
     'django_redis',
     'image_resizing',
     'django_celery_results',  # Celery 결과 백엔드 추가
-    'django_prometheus',
 ]
 
 MIDDLEWARE = [
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # 추가
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -115,7 +114,12 @@ USE_I18N = True
 USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # <https://docs.djangoproject.com/en/4.2/howto/static-files/>
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Whitenoise 설정
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Default primary key field type
 # <https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field>
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
