@@ -32,7 +32,9 @@ INSTALLED_APPS = [
     'banner',
     'django_redis',
     'image_resizing',
-    'django_celery_results',  # Celery 결과 백엔드 추가
+    'django_celery_results',  
+    'django_prometheus',
+
 ]
 
 MIDDLEWARE = [
