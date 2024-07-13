@@ -30,10 +30,11 @@ INSTALLED_APPS = [
     'background',
     'recreated_background',
     'banner',
-    'django_celery_results',
     'django_redis',
     'image_resizing',
+    'django_celery_results',  
     'django_prometheus',
+
 ]
 
 MIDDLEWARE = [
