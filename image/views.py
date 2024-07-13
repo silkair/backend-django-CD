@@ -7,10 +7,9 @@ import boto3
 from django.conf import settings
 import logging
 import base64
-
 from .models import Image
 from .serializers import ImageSerializer
-from .tasks import upload_image_to_s3  # Celery 태스크 임포트
+from .tasks import upload_image_to_s3
 
 logger = logging.getLogger(__name__)
 

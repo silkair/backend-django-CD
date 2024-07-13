@@ -28,9 +28,7 @@ urlpatterns = [
     path('api/v1/', include('recreated_background.urls')),
     path('api/v1/', include('image_resizing.urls')),
     path('', include('django_prometheus.urls')),
-
 ]
-
 
 urlpatterns += [
     path(

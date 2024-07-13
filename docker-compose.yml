@@ -24,6 +24,7 @@ services:
     depends_on:
       - mysqldb
       - rabbitmq
+      - redis
     command: >
       bash -c "python wait_mysql.py &&
       python manage.py makemigrations &&
@@ -46,6 +47,12 @@ services:
       bash -c "rabbitmq-plugins enable rabbitmq_prometheus &&
       rabbitmq-server"
 
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+
   celery:
     build:
       context: ./backend
@@ -56,8 +63,9 @@ services:
     depends_on:
       - backend
       - rabbitmq
+      - redis
     command: celery -A backend worker --loglevel=info --uid=nobody
-
+    
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
