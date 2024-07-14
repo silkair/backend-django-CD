@@ -6,8 +6,10 @@ from django.conf import settings
 import logging
 from io import BytesIO
 from .models import Image
+import redis
 
 logger = logging.getLogger(__name__)
+redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
 
 @shared_task
 def upload_image_to_s3(file_name, file_content, content_type, image_id):
@@ -37,6 +39,8 @@ def upload_image_to_s3(file_name, file_content, content_type, image_id):
         image_instance.image_url = file_url
         image_instance.save()
         logger.info(f"Updated Image {image_id} with URL: {file_url}")
+        # 작업 완료 후 Redis에서 임시 데이터 삭제
+        redis_client.delete(f'image_data_{image_id}')
     except Image.DoesNotExist:
         logger.error(f"Image with id {image_id} does not exist")
 
