@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     'image_resizing',
     'django_celery_results',  
     'django_prometheus',
-
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -153,11 +153,6 @@ DRAPHART_USER_NAME = env('DRAPHART_USER_NAME')
 DRAPHART_MULTIBLOD_SOD= env('DRAPHART_MULTIBLOD_SOD')
 DRAPHART_BD_COLOR_HEX_CODE= env('DRAPHART_BD_COLOR_HEX_CODE')
 
-#Redis를 쓰고 싶다면!
-#CELERY_BROKER_URL = 'redis://redis:6379/0'
-#CELERY_RESULT_BACKEND = 'django-cache'
-
-#RabbiMQ를 쓰고싶다면!!
 CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//' #여기서 guest:guest 는 아이디:비밀번호
 CELERY_RESULT_BACKEND = 'django-db'  # 작업 결과를 Django 데이터베이스에 저장
 CELERY_ACCEPT_CONTENT = ['json']
@@ -180,4 +175,3 @@ CACHES = {
         }
     }
 }
-
