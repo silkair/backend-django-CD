@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
     method='post',
     operation_id='이미지 리사이징 - 배경 이미지',
     operation_description='가로/세로 길이를 입력받아 배경 이미지를 리사이징합니다.',
-    tags=['Image Resize'],
+    tags=['Resizing'],
     request_body=BackgroundImageResizingSerializer,
     responses={
         200: openapi.Response('리사이징된 이미지 URL 및 ID 반환', openapi.Schema(
@@ -85,7 +85,7 @@ def resize_background_image_view(request):
     method='post',
     operation_id='이미지 리사이징 - 재생성된 배경 이미지',
     operation_description='가로/세로 길이를 입력받아 재생성된 배경 이미지를 리사이징합니다.',
-    tags=['Image Resize'],
+    tags=['Resizing'],
     request_body=RecreatedBackgroundImageResizingSerializer,
     responses={
         200: openapi.Response('리사이징된 이미지 URL 및 ID 반환', openapi.Schema(
@@ -148,7 +148,7 @@ def resize_recreated_background_image_view(request):
     method='get',
     operation_id='생성된 이미지 리사이징 조회',
     operation_description='생성된 이미지를 리사이징한 결과를 조회합니다.',
-    tags=['Image Resize'],
+    tags=['Resizing'],
     responses={
         200: BackgroundImageResizingSerializer,
         404: "Image not found.",
@@ -158,7 +158,7 @@ def resize_recreated_background_image_view(request):
     method='delete',
     operation_id='생성된 이미지 리사이징 삭제',
     operation_description='생성된 이미지를 리사이징한 결과를 삭제합니다.',
-    tags=['Image Resize'],
+    tags=['Resizing'],
     responses={
         200: openapi.Response("Image deleted successfully."),
         404: "Image not found.",
@@ -192,7 +192,7 @@ def background_image_manage(request, background_image_id):
     method='get',
     operation_id='재생성 이미지 리사이징 조회',
     operation_description='재생성되어 리사이징을 거친 사진을 조회합니다.',
-    tags=['Image Resize'],
+    tags=['Resizing'],
     responses={
         200: RecreatedBackgroundImageResizingSerializer,
         404: "Image not found.",
@@ -202,7 +202,7 @@ def background_image_manage(request, background_image_id):
     method='delete',
     operation_id='재생성 이미지 리사이징 삭제',
     operation_description='재생성되어 리사이징을 거친 사진을 삭제합니다.',
-    tags=['Image Resize'],
+    tags=['Resizing'],
     responses={
         200: openapi.Response("Image deleted successfully."),
         404: "Image not found.",
