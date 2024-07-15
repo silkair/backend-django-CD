@@ -17,11 +17,11 @@ def create_banner_task(data):
         add_information = serializer.validated_data.get('add_information')
 
         # 이전 상호작용 기록 가져오기
-        interaction_records = UserInteraction.objects.filter(user_id=user_id).order_by('-created_at')
+        interaction_records = UserInteraction.objects.filter(image_id=image_id).order_by('-created_at')
         interaction_data = " ".join(record.interaction_data for record in interaction_records)
 
-        ad_text = async_to_sync(generate_ad_text)(item_name, item_concept, item_category, add_information, interaction_data)
-        serve_text = async_to_sync(generate_serve_text)(ad_text, interaction_data)
+        ad_text = async_to_sync(generate_ad_text)(item_name, item_concept, item_category, interaction_data)
+        serve_text = async_to_sync(generate_serve_text)(ad_text, item_concept, item_category, add_information, interaction_data)
 
         banner = Banner.objects.create(
             item_name=item_name,
@@ -35,7 +35,7 @@ def create_banner_task(data):
         )
 
         # 새로운 상호작용 기록 저장
-        UserInteraction.objects.create(user_id=user_id, interaction_data=f"Created banner with ad_text: {ad_text}")
+        UserInteraction.objects.create(image_id=image_id, interaction_data=f"Created banner with ad_text: {ad_text}")
 
         return BannerSerializer(banner).data, ad_text, serve_text
     else:
