@@ -1,0 +1,9 @@
+http.host: "0.0.0.0"
+http.port: 9600
+pipeline.workers: 1
+pipeline.batch.size: 125
+pipeline.batch.delay: 50
+xpack.monitoring.enabled: true
+xpack.monitoring.elasticsearch.hosts: ["http://elasticsearch:9200"]
+pipeline.ecs_compatibility: disabled
+path.logs: /usr/share/logstash/logs

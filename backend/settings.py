@@ -2,6 +2,9 @@ from pathlib import Path
 import os
 import environ
 import pymysql
+import logging
+from logging.handlers import RotatingFileHandler
+from elasticsearch import Elasticsearch
 
 pymysql.install_as_MySQLdb()
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -11,7 +14,9 @@ SECRET_KEY = env('SECRET_KEY')
 OPENAI_API_KEY = env('OPENAI_API_KEY')
 
 DEBUG = True
-ALLOWED_HOSTS = ['localhost',
+
+ALLOWED_HOSTS = [
+    'localhost',
     '127.0.0.1',
     'backend',]
 # Application definition
@@ -30,15 +35,14 @@ INSTALLED_APPS = [
     'background',
     'recreated_background',
     'banner',
-    'django_celery_results',
     'django_redis',
     'image_resizing',
     'django_celery_results',  # Celery 결과 백엔드 추가
-    'django_prometheus',
+    'django_prometheus',      # 모니터링 할 때 추가
 ]
 
 MIDDLEWARE = [
-    'django_prometheus.middleware.PrometheusBeforeMiddleware',
+    'django_prometheus.middleware.PrometheusBeforeMiddleware', #(모니터링 할 때 추가)
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -47,7 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_prometheus.middleware.PrometheusAfterMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware', #(모니터링 할 때 추가)
 ]
 ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
@@ -175,3 +179,42 @@ CACHES = {
     }
 }
 
+# 커스텀 Elasticsearch 핸들러 정의
+class ElasticsearchHandler(logging.Handler):
+    def __init__(self, hosts=None, index='django-logs'):
+        logging.Handler.__init__(self)
+        self.es = Elasticsearch(hosts=hosts)
+        self.index = index
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        self.es.index(index=self.index, document={'message': log_entry})
+
+#LOGGING설정
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/app/logs/debug.log',
+            'formatter': 'verbose',
+            'maxBytes': 1024*1024*5,  # 5 MB
+            'backupCount': 5,  # 백업 파일 수
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

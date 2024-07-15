@@ -39,3 +39,6 @@ django-cors-headers==3.13.0
 httpx==0.24.0
 python-dotenv==0.21.0
 django-prometheus
+django-redis==5.2.0
+logstash-formatter
+elasticsearch
