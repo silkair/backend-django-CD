@@ -21,18 +21,18 @@ openai_api_key = env("OPENAI_API_KEY")
 
 logger = logging.getLogger(__name__)
 
-async def generate_ad_text(item_name, item_concept, item_category, add_information, interaction_data):
+async def generate_ad_text(item_name, item_concept, item_category, interaction_data):
     headers = {
         'Authorization': f'Bearer {openai_api_key}',
         'Content-Type': 'application/json'
     }
     data = {
-        "model": "gpt-3.5-turbo",
+        "model": "gpt-3.5-turbo",#시현 할 때는  "model": "gpt-4o",
         "messages": [
-            {"role": "system", "content": "당신은 창의적인 카피라이터입니다. 각 요청에 대해 일관된 광고 문구를 생성하세요."},
-            {"role": "user", "content": f"다음 정보를 바탕으로 '{item_name}' 제품의 광고 문구를 생성해 주세요: "
-                                        f"컨셉 - '{item_concept}', 카테고리 - '{item_category}', 추가 정보 - '{add_information}'. "
-                                        f"이전에 사용자와의 상호작용: {interaction_data}"}
+            {"role": "system", "content": "당신은 창의적인 카피라이터입니다. 각 요청에 대해 일관된 광고 문구를 한 문장으로 생성하세요. 광고 문구는 최대 20자 이내의 완전한 문장으로 작성하세요. 글자 수 제한에 따라 완전한 문장이 되지 않는다면 다시 생성해주세요."},
+            {"role": "user", "content": f"다음 정보를 바탕으로 '{item_name}' 제품의 광고 문구를 1문장만 생성해 주세요: "
+                                        f"컨셉 - '{item_concept}', 카테고리 - '{item_category}'. "
+                                        f"이전 결과값 과의 상호작용: {interaction_data}"}
         ],
         "max_tokens": 50
     }
@@ -43,22 +43,23 @@ async def generate_ad_text(item_name, item_concept, item_category, add_informati
             response.raise_for_status()
             response_json = response.json()
             ad_text = response_json['choices'][0]['message']['content'].strip()
-            return ad_text
+            return ad_text[:20]  # 광고 문구를 최대 30자 이내로 제한
         except httpx.HTTPStatusError as exc:
             logger.error(f"Error response {exc.response.status_code} while requesting {exc.request.url!r}.")
             raise
 
-async def generate_serve_text(ad_text, interaction_data):
+async def generate_serve_text(ad_text, item_concept, item_category, add_information, interaction_data):
     headers = {
         'Authorization': f'Bearer {openai_api_key}',
         'Content-Type': 'application/json'
     }
     data = {
-        "model": "gpt-3.5-turbo",
+        "model": "gpt-3.5-turbo",#시현 할 때는  "model": "gpt-4o",
         "messages": [
-            {"role": "system", "content": "당신은 창의적인 카피라이터입니다. 각 요청에 대해 일관된 광고 문구를 생성하세요."},
-            {"role": "user", "content": f"다음 메인 광고글을 광고하는 서브 광고글을 작성해 주세요: '{ad_text}'. "
-                                        f"이전에 사용자와의 상호작용: {interaction_data}"}
+            {"role": "system", "content": "당신은 창의적인 카피라이터입니다. 각 요청에 대해 일관된 광고 문구를 생성하세요. 광고 문구는 최대 30자 이내의 완전한 문장으로 작성하세요. 글자 수 제한에 따라 완전한 문장이 되지 않는다면, 다시 생성해주세요."},
+            {"role": "user", "content": f"다음 정보를 바탕으로 광고글의 내용을 뒷받침하는 서브 광고글을 작성해 주세요: '{ad_text}'. '{ad_text}' 와는 다른 문장으로 작성하세요. "
+                                        f"컨셉 - '{item_concept}', 카테고리 - '{item_category}', 추가 정보 - '{add_information}'. "
+                                        f"이전에 결과값 과의 상호작용: {interaction_data}"}
         ],
         "max_tokens": 50
     }
@@ -69,7 +70,7 @@ async def generate_serve_text(ad_text, interaction_data):
             response.raise_for_status()
             response_json = response.json()
             serve_text = response_json['choices'][0]['message']['content'].strip()
-            return serve_text
+            return serve_text[:30]  # 광고 문구를 최대 30자 이내로 제한
         except httpx.HTTPStatusError as exc:
             logger.error(f"Error response {exc.response.status_code} while requesting {exc.request.url!r}.")
             raise

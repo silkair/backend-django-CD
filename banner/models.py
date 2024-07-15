@@ -17,6 +17,6 @@ class Banner(models.Model):
     is_deleted = models.BooleanField(default=False)
 
 class UserInteraction(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    image_id = models.ForeignKey(Image, on_delete=models.CASCADE)
     interaction_data = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
