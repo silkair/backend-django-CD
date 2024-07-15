@@ -1,8 +1,5 @@
-# views.py
-
-import os
-import httpx
 import logging
+import httpx
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework import status
@@ -10,14 +7,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Banner, UserInteraction
 from .serializers import BannerSerializer, BannerDetailSerializer, BannerUpdateSerializer
-from django.conf import settings
-
-# OpenAI API 키 설정
-openai_api_key = settings.OPENAI_API_KEY
-from dotenv import load_dotenv
-from django.core.cache import cache
 import environ
-from asgiref.sync import sync_to_async, async_to_sync
+from asgiref.sync import async_to_sync
+from celery.result import AsyncResult
+from .tasks import create_banner_task
 
 # 환경 변수 로드
 env = environ.Env()
@@ -26,7 +19,6 @@ environ.Env.read_env()
 # OpenAI API 키 설정
 openai_api_key = env("OPENAI_API_KEY")
 
-# 로깅 설정
 logger = logging.getLogger(__name__)
 
 async def generate_ad_text(item_name, item_concept, item_category, add_information, interaction_data):
@@ -96,43 +88,12 @@ async def generate_serve_text(ad_text, interaction_data):
 def create_banner(request):
     serializer = BannerSerializer(data=request.data)
     if serializer.is_valid():
-        item_name = serializer.validated_data.get('item_name')
-        item_concept = serializer.validated_data.get('item_concept')
-        item_category = serializer.validated_data.get('item_category')
-        user_id = serializer.validated_data.get('user_id')
-        image_id = serializer.validated_data.get('image_id')
-        add_information = serializer.validated_data.get('add_information')
+        data = serializer.validated_data
+        data['image_id'] = data['image_id'].id
+        data['user_id'] = data['user_id'].id
+        task = create_banner_task.delay(data)
 
-        # 이전 상호작용 기록 가져오기
-        interaction_records = UserInteraction.objects.filter(user_id=user_id).order_by('-created_at')
-        interaction_data = " ".join(record.interaction_data for record in interaction_records)
-
-        ad_text = async_to_sync(generate_ad_text)(item_name, item_concept, item_category, add_information, interaction_data)
-        serve_text = async_to_sync(generate_serve_text)(ad_text, interaction_data)
-
-        banner = Banner.objects.create(
-            item_name=item_name,
-            item_concept=item_concept,
-            item_category=item_category,
-            ad_text=ad_text,
-            serve_text=serve_text,
-            user_id=user_id,
-            image_id=image_id,
-            add_information=add_information
-        )
-
-        # 새로운 상호작용 기록 저장
-        UserInteraction.objects.create(user_id=user_id, interaction_data=f"Created banner with ad_text: {ad_text}")
-
-        response_data = {
-            "code": 201,
-            "message": "배너 생성 성공",
-            "data": BannerSerializer(banner).data,
-            "ad_text": ad_text,
-            "serve_text": serve_text
-        }
-
-        return Response(response_data, status=status.HTTP_201_CREATED)
+        return Response({"code": 201, "message": "배너 생성 요청이 접수되었습니다.", "task_id": task.id}, status=status.HTTP_201_CREATED)
 
     return Response({"code": 400, "message": "배너 생성 실패", "errors": serializer.errors},
                     status=status.HTTP_400_BAD_REQUEST)
@@ -239,3 +200,13 @@ def handle_banner(request, banner_id):
         return Response({"code": 200, "message": "배너 삭제 성공"}, status=status.HTTP_200_OK)
 
     return Response({"code": 405, "message": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+@api_view(['GET'])
+def get_task_status(request, task_id):
+    task_result = AsyncResult(task_id)
+    result = {
+        'task_id': task_id,
+        'status': task_result.status,
+        'result': task_result.result,
+    }
+    return Response(result)

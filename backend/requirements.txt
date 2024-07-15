@@ -42,3 +42,5 @@ django-prometheus
 django-redis==5.2.0
 logstash-formatter
 elasticsearch
+gunicorn==20.1.0
+whitenoise==6.0.0

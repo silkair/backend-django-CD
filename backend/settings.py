@@ -37,14 +37,16 @@ INSTALLED_APPS = [
     'banner',
     'django_redis',
     'image_resizing',
-    'django_celery_results',  # Celery 결과 백엔드 추가
-    'django_prometheus',      # 모니터링 할 때 추가
+    'django_celery_results',  
+    'django_prometheus',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
     'django_prometheus.middleware.PrometheusBeforeMiddleware', #(모니터링 할 때 추가)
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # 추가
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -119,7 +121,12 @@ USE_I18N = True
 USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # <https://docs.djangoproject.com/en/4.2/howto/static-files/>
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Whitenoise 설정
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Default primary key field type
 # <https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field>
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -151,11 +158,6 @@ DRAPHART_USER_NAME = env('DRAPHART_USER_NAME')
 DRAPHART_MULTIBLOD_SOD= env('DRAPHART_MULTIBLOD_SOD')
 DRAPHART_BD_COLOR_HEX_CODE= env('DRAPHART_BD_COLOR_HEX_CODE')
 
-#Redis를 쓰고 싶다면!
-#CELERY_BROKER_URL = 'redis://redis:6379/0'
-#CELERY_RESULT_BACKEND = 'django-cache'
-
-#RabbiMQ를 쓰고싶다면!!
 CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//' #여기서 guest:guest 는 아이디:비밀번호
 CELERY_RESULT_BACKEND = 'django-db'  # 작업 결과를 Django 데이터베이스에 저장
 CELERY_ACCEPT_CONTENT = ['json']
