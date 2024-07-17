@@ -110,7 +110,7 @@ services:
        - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)($$|/)"'
 
   cadvisor:
-     image: google/cadvisor:latest
+     image: gcr.io/cadvisor/cadvisor
      container_name: cadvisor
      ports:
        - "8080:8080"
@@ -118,6 +118,7 @@ services:
        - /:/rootfs:ro
        - /var/run:/var/run:rw
        - /sys:/sys:ro
+       - /sys/fs/cgroup:/sys/fs/cgroup:ro
        - /var/lib/docker/:/var/lib/docker:ro
      restart: unless-stopped
 
