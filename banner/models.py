@@ -9,8 +9,13 @@ class Banner(models.Model):
     item_name = models.CharField(max_length=10)
     item_concept = models.CharField(max_length=15)
     item_category = models.CharField(max_length=10)
+
     ad_text = models.CharField(max_length=150)  # 메인 광고글 길이 늘림
     serve_text = models.CharField(max_length=100, default='Default serve text')  # 기본 값 추가
+
+    ad_text2 = models.CharField(max_length=150, blank=True, null=True)  # 새롭게 추가한 ad_text2
+    serve_text2 = models.CharField(max_length=100, blank=True, null=True) # 새롭게 추가한 serve_text2
+
     add_information = models.TextField(null=True, blank=True)  # 추가 정보 필드
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
