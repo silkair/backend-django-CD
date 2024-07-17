@@ -26,6 +26,9 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'backend',
+    '43.201.135.118',
+    'techeerpicture.store',
+    'www.techeerpicture.store',
 ]
 
 # Application definition
