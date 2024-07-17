@@ -5,11 +5,18 @@ import pymysql
 import logging
 from logging.handlers import RotatingFileHandler
 from elasticsearch import Elasticsearch
+import io
 
 pymysql.install_as_MySQLdb()
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent  # 현재 파일의 부모 디렉토리로 설정
+
+# .env 파일 경로
+env_file = os.path.join(BASE_DIR, '.env')
+
+# 환경 변수를 설정
 env = environ.Env()
-env.read_env()
+env.read_env(env_file)
+
 SECRET_KEY = env('SECRET_KEY')
 OPENAI_API_KEY = env('OPENAI_API_KEY')
 
@@ -18,7 +25,9 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'backend',]
+    'backend',
+]
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -37,13 +46,13 @@ INSTALLED_APPS = [
     'banner',
     'django_redis',
     'image_resizing',
-    'django_celery_results',  
+    'django_celery_results',
     'django_prometheus',
     'django_celery_beat',
 ]
 
 MIDDLEWARE = [
-    'django_prometheus.middleware.PrometheusBeforeMiddleware', #(모니터링 할 때 추가)
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',  # (모니터링 할 때 추가)
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # 추가
@@ -53,9 +62,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_prometheus.middleware.PrometheusAfterMiddleware', #(모니터링 할 때 추가)
+    'django_prometheus.middleware.PrometheusAfterMiddleware',  # (모니터링 할 때 추가)
 ]
+
 ROOT_URLCONF = 'backend.urls'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -84,8 +95,8 @@ SWAGGER_SETTINGS = {
 }
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+
 # Database
-# <https://docs.djangoproject.com/en/4.2/ref/settings/#databases>
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -97,8 +108,8 @@ DATABASES = {
         'CONN_MAX_AGE': 0,  # 매 쿼리마다 새로운 커넥션을 생성
     }
 }
+
 # Password validation
-# <https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators>
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -113,14 +124,14 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
 # Internationalization
-# <https://docs.djangoproject.com/en/4.2/topics/i18n/>
 LANGUAGE_CODE = 'ko-kr'
 TIME_ZONE = 'Asia/Seoul'
 USE_I18N = True
 USE_TZ = True
+
 # Static files (CSS, JavaScript, Images)
-# <https://docs.djangoproject.com/en/4.2/howto/static-files/>
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
@@ -128,7 +139,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
-# <https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field>
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -155,10 +165,10 @@ OPENAI_API_KEY = env('OPENAI_API_KEY')
 
 DRAPHART_API_KEY = env('DRAPHART_API_KEY')
 DRAPHART_USER_NAME = env('DRAPHART_USER_NAME')
-DRAPHART_MULTIBLOD_SOD= env('DRAPHART_MULTIBLOD_SOD')
-DRAPHART_BD_COLOR_HEX_CODE= env('DRAPHART_BD_COLOR_HEX_CODE')
+DRAPHART_MULTIBLOD_SOD = env('DRAPHART_MULTIBLOD_SOD')
+DRAPHART_BD_COLOR_HEX_CODE = env('DRAPHART_BD_COLOR_HEX_CODE')
 
-CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//' #여기서 guest:guest 는 아이디:비밀번호
+CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'  # 여기서 guest:guest 는 아이디:비밀번호
 CELERY_RESULT_BACKEND = 'django-db'  # 작업 결과를 Django 데이터베이스에 저장
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
@@ -192,7 +202,7 @@ class ElasticsearchHandler(logging.Handler):
         log_entry = self.format(record)
         self.es.index(index=self.index, document={'message': log_entry})
 
-#LOGGING설정
+# LOGGING 설정
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -202,7 +212,7 @@ LOGGING = {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': '/app/logs/debug.log',
             'formatter': 'verbose',
-            'maxBytes': 1024*1024*5,  # 5 MB
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
             'backupCount': 5,  # 백업 파일 수
         },
     },
