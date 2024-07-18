@@ -74,88 +74,88 @@ services:
       python manage.py migrate &&
       gunicorn -w 4 -b 0.0.0.0:8000 --timeout 300 backend.wsgi:application"  # Celery 실행 명령
 
-  prometheus:
-    image: prom/prometheus:latest  # Prometheus 이미지
-    container_name: prometheus  # Prometheus 컨테이너 이름
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml  # Prometheus 설정 파일 마운트
-    ports:
-      - "9090:9090"  # Prometheus 포트 매핑
-    depends_on:
-      - backend  # 종속 서비스
-
-  grafana:
-    image: grafana/grafana:latest  # Grafana 이미지
-    container_name: grafana  # Grafana 컨테이너 이름
-    ports:
-      - "3000:3000"  # Grafana 포트 매핑
-    volumes:
-      - grafana_data:/var/lib/grafana  # 데이터 저장소 마운트
-    depends_on:
-      - prometheus  # 종속 서비스
-
-  node-exporter:
-    image: prom/node-exporter:latest  # Node Exporter 이미지
-    container_name: node-exporter  # Node Exporter 컨테이너 이름
-    ports:
-      - "9100:9100"  # Node Exporter 포트 매핑
-    restart: unless-stopped  # 컨테이너 자동 재시작 설정
-    volumes:
-      - /proc:/host/proc:ro  # 시스템 경로 마운트
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - '--path.procfs=/host/proc'  # Node Exporter 명령줄 인수
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)($$|/)"'
-
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor  # cAdvisor 이미지
-    container_name: cadvisor  # cAdvisor 컨테이너 이름
-    ports:
-      - "8080:8080"  # cAdvisor 포트 매핑
-    volumes:
-      - /:/rootfs:ro  # 시스템 경로 마운트
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    restart: unless-stopped  # 컨테이너 자동 재시작 설정
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9  # Elasticsearch 이미지
-    container_name: elasticsearch  # Elasticsearch 컨테이너 이름
-    environment:
-      - discovery.type=single-node  # 단일 노드 설정
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m  # Java 메모리 설정
-    ports:
-      - "9200:9200"  # Elasticsearch 포트 매핑
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data  # 데이터 저장소 마운트
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:7.17.9  # Logstash 이미지
-    container_name: logstash  # Logstash 컨테이너 이름
-    volumes:
-      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf  # Logstash 설정 파일 마운트
-      - ./logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./logs:/usr/share/logstash/logs  # 로그 디렉토리 마운트
-    ports:
-      - "5044:5044"  # Logstash Beats input 포트 매핑
-      - "9600:9600"  # Logstash API 포트 추가
-    depends_on:
-      - elasticsearch  # 종속 서비스
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.9  # Kibana 이미지
-    container_name: kibana  # Kibana 컨테이너 이름
-    ports:
-      - "5601:5601"  # Kibana 포트 매핑
-    depends_on:
-      - elasticsearch  # 종속 서비스
+#  prometheus:
+#    image: prom/prometheus:latest  # Prometheus 이미지
+#    container_name: prometheus  # Prometheus 컨테이너 이름
+#    volumes:
+#      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml  # Prometheus 설정 파일 마운트
+#    ports:
+#      - "9090:9090"  # Prometheus 포트 매핑
+#    depends_on:
+#      - backend  # 종속 서비스
+#
+#  grafana:
+#    image: grafana/grafana:latest  # Grafana 이미지
+#    container_name: grafana  # Grafana 컨테이너 이름
+#    ports:
+#      - "3000:3000"  # Grafana 포트 매핑
+#    volumes:
+#      - grafana_data:/var/lib/grafana  # 데이터 저장소 마운트
+#    depends_on:
+#      - prometheus  # 종속 서비스
+#
+#  node-exporter:
+#    image: prom/node-exporter:latest  # Node Exporter 이미지
+#    container_name: node-exporter  # Node Exporter 컨테이너 이름
+#    ports:
+#      - "9100:9100"  # Node Exporter 포트 매핑
+#    restart: unless-stopped  # 컨테이너 자동 재시작 설정
+#    volumes:
+#      - /proc:/host/proc:ro  # 시스템 경로 마운트
+#      - /sys:/host/sys:ro
+#      - /:/rootfs:ro
+#    command:
+#      - '--path.procfs=/host/proc'  # Node Exporter 명령줄 인수
+#      - '--path.sysfs=/host/sys'
+#      - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)($$|/)"'
+#
+#  cadvisor:
+#    image: gcr.io/cadvisor/cadvisor  # cAdvisor 이미지
+#    container_name: cadvisor  # cAdvisor 컨테이너 이름
+#    ports:
+#      - "8080:8080"  # cAdvisor 포트 매핑
+#    volumes:
+#      - /:/rootfs:ro  # 시스템 경로 마운트
+#      - /var/run:/var/run:rw
+#      - /sys:/sys:ro
+#      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+#      - /var/lib/docker/:/var/lib/docker:ro
+#    restart: unless-stopped  # 컨테이너 자동 재시작 설정
+#
+#  elasticsearch:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9  # Elasticsearch 이미지
+#    container_name: elasticsearch  # Elasticsearch 컨테이너 이름
+#    environment:
+#      - discovery.type=single-node  # 단일 노드 설정
+#      - ES_JAVA_OPTS=-Xms512m -Xmx512m  # Java 메모리 설정
+#    ports:
+#      - "9200:9200"  # Elasticsearch 포트 매핑
+#    volumes:
+#      - elasticsearch_data:/usr/share/elasticsearch/data  # 데이터 저장소 마운트
+#
+#  logstash:
+#    image: docker.elastic.co/logstash/logstash:7.17.9  # Logstash 이미지
+#    container_name: logstash  # Logstash 컨테이너 이름
+#    volumes:
+#      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf  # Logstash 설정 파일 마운트
+#      - ./logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
+#      - ./logs:/usr/share/logstash/logs  # 로그 디렉토리 마운트
+#    ports:
+#      - "5044:5044"  # Logstash Beats input 포트 매핑
+#      - "9600:9600"  # Logstash API 포트 추가
+#    depends_on:
+#      - elasticsearch  # 종속 서비스
+#
+#  kibana:
+#    image: docker.elastic.co/kibana/kibana:7.17.9  # Kibana 이미지
+#    container_name: kibana  # Kibana 컨테이너 이름
+#    ports:
+#      - "5601:5601"  # Kibana 포트 매핑
+#    depends_on:
+#      - elasticsearch  # 종속 서비스
 
 volumes:
   mysql_data:  # MySQL 데이터 볼륨
   rabbitmq_data:  # RabbitMQ 데이터 볼륨
-  grafana_data:  # Grafana 데이터 볼륨
-  elasticsearch_data:  # Elasticsearch 데이터 볼륨
+  #grafana_data:  # Grafana 데이터 볼륨
+  #elasticsearch_data:  # Elasticsearch 데이터 볼륨
