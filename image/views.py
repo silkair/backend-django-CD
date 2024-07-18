@@ -11,8 +11,10 @@ from .models import Image
 from .serializers import ImageSerializer
 from .tasks import upload_image_to_s3
 
+# 로깅 설정
 logger = logging.getLogger(__name__)
 
+# Swagger를 사용하여 이미지 업로드 API 문서화
 @swagger_auto_schema(
     method='post',
     operation_id='이미지 업로드',
@@ -30,24 +32,29 @@ def upload_image(request, *args, **kwargs):
     """
     이미지 업로드
     """
+    # 요청 데이터를 시리얼라이즈
     serializer = ImageSerializer(data=request.data, context={'request': request})
     try:
         serializer.is_valid(raise_exception=True)
     except serializers.ValidationError as e:
+        # 유효성 검증 오류 로그 기록
         logger.error("Validation error: ", e)
         error_message = {
             "error": e.detail,
         }
         return Response(error_message, status=status.HTTP_400_BAD_REQUEST)
 
+    # 파일과 사용자 ID 추출
     file = request.FILES['file']
     user_id = request.data.get('user_id')
     content_type = file.content_type  # 파일의 content_type을 가져옴
     file_content = base64.b64encode(file.read()).decode('utf-8')  # 파일 내용을 base64로 인코딩하여 전달
 
+    # 이미지 인스턴스 생성
     image_instance = Image.objects.create(user_id=user_id, image_url='')
 
-    logger.info(f"Calling Celery task for uploading file: {file.name}")  # 비동기로 S3 업로드
+    # 비동기로 S3 업로드
+    logger.info(f"Calling Celery task for uploading file: {file.name}")
     # Celery 태스크 호출
     result = upload_image_to_s3.delay(file.name, file_content, content_type, image_instance.id)
     logger.info(f"Celery task called with ID: {result.id}")
@@ -57,6 +64,7 @@ def upload_image(request, *args, **kwargs):
         "image_id": image_instance.id
     }, status=status.HTTP_202_ACCEPTED)
 
+# Swagger를 사용하여 이미지 조회 및 삭제 API 문서화
 @swagger_auto_schema(
     method='get',
     operation_id='이미지 조회',
@@ -82,14 +90,18 @@ def image_manage(request, image_id):
     """
     이미지 조회 및 삭제 뷰셋
     """
+    # 이미지 객체를 데이터베이스에서 가져옴
     try:
-        image = Image.objects.get(id=image_id)  # 이미지 객체를 데이터베이스에서 가져옴
+        image = Image.objects.get(id=image_id)
     except Image.DoesNotExist:
-        return Response({"error": "해당 이미지를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)  # 이미지가 없으면 404 응답
+        # 이미지가 없으면 404 응답
+        return Response({"error": "해당 이미지를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = ImageSerializer(image)  # 이미지 객체를 시리얼라이즈
-        return Response({"success": "이미지가 성공적으로 조회되었습니다.", "data": serializer.data}, status=status.HTTP_200_OK)  # 성공 응답
+        # 이미지 객체를 시리얼라이즈
+        serializer = ImageSerializer(image)
+        # 성공 응답
+        return Response({"success": "이미지가 성공적으로 조회되었습니다.", "data": serializer.data}, status=status.HTTP_200_OK)
 
     elif request.method == 'DELETE':
         # S3에서 파일 삭제
@@ -99,4 +111,5 @@ def image_manage(request, image_id):
 
         # 데이터베이스에서 이미지 삭제
         image.delete()
-        return Response({"success": "이미지가 성공적으로 삭제되었습니다."}, status=status.HTTP_200_OK)  # 성공적으로 삭제되었음을 나타내는 200 응답
+        # 성공적으로 삭제되었음을 나타내는 200 응답
+        return Response({"success": "이미지가 성공적으로 삭제되었습니다."}, status=status.HTTP_200_OK)
