@@ -3,35 +3,32 @@ import os
 import environ
 import pymysql
 import logging
-from logging.handlers import RotatingFileHandler
 from elasticsearch import Elasticsearch
-import io
 
+# MySQLdb 대신 pymysql 사용
 pymysql.install_as_MySQLdb()
-BASE_DIR = Path(__file__).resolve().parent  # 현재 파일의 부모 디렉토리로 설정
 
-# .env 파일 경로
+# 현재 파일의 부모 디렉토리로 설정
+BASE_DIR = Path(__file__).resolve().parent
+
+# .env 파일 경로 설정
 env_file = os.path.join(BASE_DIR, '.env')
 
 # 환경 변수를 설정
 env = environ.Env()
 env.read_env(env_file)
 
+# Django의 SECRET_KEY 및 OpenAI API 키 설정
 SECRET_KEY = env('SECRET_KEY')
 OPENAI_API_KEY = env('OPENAI_API_KEY')
 
+# 디버그 모드 활성화
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'backend',
-    '43.201.135.118',
-    'techeerpicture.store',
-    'www.techeerpicture.store',
-]
+# 허용된 호스트 설정
+ALLOWED_HOSTS = ['*']
 
-# Application definition
+# 애플리케이션 정의
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -52,24 +49,28 @@ INSTALLED_APPS = [
     'django_celery_results',
     'django_prometheus',
     'django_celery_beat',
+    'corsheaders',
 ]
 
+# 미들웨어 설정
 MIDDLEWARE = [
-    'django_prometheus.middleware.PrometheusBeforeMiddleware',  # (모니터링 할 때 추가)
-    'corsheaders.middleware.CorsMiddleware',
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',  # 모니터링 미들웨어 (시작)
+    'corsheaders.middleware.CorsMiddleware',                    # CORS 설정
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # 추가
+    'whitenoise.middleware.WhiteNoiseMiddleware',               # 정적 파일 처리 미들웨어
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_prometheus.middleware.PrometheusAfterMiddleware',  # (모니터링 할 때 추가)
+    'django_prometheus.middleware.PrometheusAfterMiddleware',   # 모니터링 미들웨어 (끝)
 ]
 
+# URL 설정
 ROOT_URLCONF = 'backend.urls'
 
+# 템플릿 설정
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -86,6 +87,7 @@ TEMPLATES = [
     },
 ]
 
+# Swagger 설정
 SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
     'SECURITY_DEFINITIONS': {
@@ -97,9 +99,10 @@ SWAGGER_SETTINGS = {
     },
 }
 
+# WSGI 애플리케이션 경로
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# Database
+# 데이터베이스 설정
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -112,7 +115,7 @@ DATABASES = {
     }
 }
 
-# Password validation
+# 비밀번호 검증기 설정
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -128,31 +131,33 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
+# 국제화 설정
 LANGUAGE_CODE = 'ko-kr'
 TIME_ZONE = 'Asia/Seoul'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# 정적 파일 설정
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Whitenoise 설정
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Default primary key field type
+# 기본 primary key 필드 타입 설정
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CORS 설정
 CORS_ORIGIN_ALLOW_ALL = True
 
-# AWS S3 연결
+# AWS S3 설정
 AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME')
 AWS_QUERYSTRING_AUTH = False
 
-# 파일 저장 시 S3 를 디폴드 값으로 설정
+# 기본 파일 저장 설정 (S3 사용)
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # DRF 설정
@@ -164,14 +169,17 @@ REST_FRAMEWORK = {
     ),
 }
 
+# OpenAI API 키 설정
 OPENAI_API_KEY = env('OPENAI_API_KEY')
 
+# 추가 환경 변수 설정
 DRAPHART_API_KEY = env('DRAPHART_API_KEY')
 DRAPHART_USER_NAME = env('DRAPHART_USER_NAME')
 DRAPHART_MULTIBLOD_SOD = env('DRAPHART_MULTIBLOD_SOD')
 DRAPHART_BD_COLOR_HEX_CODE = env('DRAPHART_BD_COLOR_HEX_CODE')
 
-CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'  # 여기서 guest:guest 는 아이디:비밀번호
+# Celery 설정
+CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'  # RabbitMQ 설정 (아이디:비밀번호)
 CELERY_RESULT_BACKEND = 'django-db'  # 작업 결과를 Django 데이터베이스에 저장
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
@@ -183,7 +191,7 @@ CELERY_WORKER_HIJACK_ROOT_LOGGER = False  # Celery가 root logger를 hijack하�
 CELERYD_TASK_TIME_LIMIT = 300  # 작업 제한 시간 설정 (초)
 CELERYD_TASK_SOFT_TIME_LIMIT = 270  # 소프트 제한 시간 설정 (초)
 
-# Redis settings for Django cache
+# Redis 설정 (Django 캐시)
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
@@ -213,7 +221,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/app/logs/debug.log',
+            'filename': '/app/logs/debug.log',  # 로그 파일 경로
             'formatter': 'verbose',
             'maxBytes': 1024 * 1024 * 5,  # 5 MB
             'backupCount': 5,  # 백업 파일 수
