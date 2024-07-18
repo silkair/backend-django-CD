@@ -3,9 +3,7 @@ import os
 import environ
 import pymysql
 import logging
-from logging.handlers import RotatingFileHandler
 from elasticsearch import Elasticsearch
-import io
 
 # MySQLdb 대신 pymysql 사용
 pymysql.install_as_MySQLdb()
@@ -27,15 +25,7 @@ OPENAI_API_KEY = env('OPENAI_API_KEY')
 # 디버그 모드 활성화
 DEBUG = True
 
-# 허용된 호스트 설정
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'backend',
-    '43.201.135.118',
-    'techeerpicture.store',
-    'www.techeerpicture.store',
-]
+ALLOWED_HOSTS = ['*']
 
 # 애플리케이션 정의
 INSTALLED_APPS = [
@@ -58,6 +48,7 @@ INSTALLED_APPS = [
     'django_celery_results',
     'django_prometheus',
     'django_celery_beat',
+    'corsheaders',
 ]
 
 # 미들웨어 설정
