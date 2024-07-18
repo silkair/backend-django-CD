@@ -25,7 +25,6 @@ OPENAI_API_KEY = env('OPENAI_API_KEY')
 # 디버그 모드 활성화
 DEBUG = True
 
-# 허용된 호스트 설정
 ALLOWED_HOSTS = ['*']
 
 # 애플리케이션 정의

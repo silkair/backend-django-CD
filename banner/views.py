@@ -20,12 +20,14 @@ environ.Env.read_env()
 # OpenAI API 키 설정
 openai_api_key = env("OPENAI_API_KEY")
 
+# 로거 설정
 logger = logging.getLogger(__name__)
 
 
+# 광고 문구 생성을 위한 비동기 함수
 async def generate_ad_text(item_name, item_concept, item_category, interaction_data):
     headers = {
-        'Authorization': f'Bearer {openai_api_key}',
+        'Authorization': f'Bearer {openai_api_key}',  # OpenAI API 키를 헤더에 포함
         'Content-Type': 'application/json'
     }
     data = {
@@ -37,7 +39,7 @@ async def generate_ad_text(item_name, item_concept, item_category, interaction_d
                                         f"컨셉 - '{item_concept}', 카테고리 - '{item_category}'. "
                                         f"이전 결과값 과의 상호작용: {interaction_data}"}
         ],
-        "max_tokens": 50
+        "max_tokens": 50  # 최대 토큰 수를 50으로 설정
     }
 
     async with httpx.AsyncClient() as client:
@@ -52,9 +54,10 @@ async def generate_ad_text(item_name, item_concept, item_category, interaction_d
             raise
 
 
+# 서브 광고 문구 생성을 위한 비동기 함수
 async def generate_serve_text(ad_text, item_concept, item_category, add_information, interaction_data):
     headers = {
-        'Authorization': f'Bearer {openai_api_key}',
+        'Authorization': f'Bearer {openai_api_key}',  # OpenAI API 키를 헤더에 포함
         'Content-Type': 'application/json'
     }
     data = {
@@ -67,7 +70,7 @@ async def generate_serve_text(ad_text, item_concept, item_category, add_informat
                         f"컨셉 - '{item_concept}', 카테고리 - '{item_category}', 추가 정보 - '{add_information}'. "
                         f"이전에 결과값 과의 상호작용: {interaction_data}"}
         ],
-        "max_tokens": 50
+        "max_tokens": 50  # 최대 토큰 수를 50으로 설정
     }
 
     async with httpx.AsyncClient() as client:
@@ -76,12 +79,13 @@ async def generate_serve_text(ad_text, item_concept, item_category, add_informat
             response.raise_for_status()
             response_json = response.json()
             serve_text = response_json['choices'][0]['message']['content'].strip()
-            return serve_text[:30]  # 광고 문구를 최대 30자 이내로 제한
+            return serve_text[:30]  # 서브 광고 문구를 최대 30자 이내로 제한
         except httpx.HTTPStatusError as exc:
             logger.error(f"Error response {exc.response.status_code} while requesting {exc.request.url!r}.")
             raise
 
 
+# 광고 문구와 서브 광고 문구를 생성하는 비동기 함수
 async def generate_ad_and_serve_texts(item_name, item_concept, item_category, add_information, interaction_data):
     ad_text = await generate_ad_text(item_name, item_concept, item_category, interaction_data)
     serve_text = await generate_serve_text(ad_text, item_concept, item_category, add_information, interaction_data)
@@ -90,6 +94,7 @@ async def generate_ad_and_serve_texts(item_name, item_concept, item_category, ad
     return ad_text, serve_text, ad_text2, serve_text2
 
 
+# Swagger를 이용한 API 문서화와 배너 생성 API
 @swagger_auto_schema(
     method='post',
     operation_id='배너 생성',
@@ -177,6 +182,7 @@ def create_banner(request):
                     status=status.HTTP_400_BAD_REQUEST)
 
 
+# 배너 조회, 수정, 삭제 API를 위한 Swagger 설정
 @swagger_auto_schema(
     method='get',
     operation_id='배너 조회',
@@ -225,12 +231,12 @@ def create_banner(request):
 @api_view(['GET', 'PUT', 'DELETE'])
 def handle_banner(request, banner_id):
     try:
-        banner = Banner.objects.get(id=banner_id)
+        banner = Banner.objects.get(id=banner_id)  # 배너 ID로 배너 객체를 조회
     except Banner.DoesNotExist:
         return Response({"code": 404, "message": "배너 조회 실패"}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = BannerDetailSerializer(banner)
+        serializer = BannerDetailSerializer(banner)  # 배너 객체를 직렬화
         return Response({"code": 200, "message": "배너 조회 성공", "data": serializer.data}, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
@@ -247,10 +253,12 @@ def handle_banner(request, banner_id):
             interaction_records = UserInteraction.objects.filter(image_id=image_instance).order_by('-created_at')
             interaction_data = " ".join(record.interaction_data for record in interaction_records)
 
+            # 광고 문구와 서브 광고 문구 생성
             ad_text, serve_text, ad_text2, serve_text2 = async_to_sync(generate_ad_and_serve_texts)(
                 item_name, item_concept, item_category, add_information, interaction_data
             )
 
+            # 배너 객체 업데이트
             banner.item_name = item_name
             banner.item_concept = item_concept
             banner.item_category = item_category
@@ -279,12 +287,13 @@ def handle_banner(request, banner_id):
                         status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
-        banner.delete()
+        banner.delete()  # 배너 객체 삭제
         return Response({"code": 200, "message": "배너 삭제 성공"}, status=status.HTTP_200_OK)
 
     return Response({"code": 405, "message": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+# 비동기 태스크 상태 조회 API
 @api_view(['GET'])
 def get_task_status(request, task_id):
     task_result = AsyncResult(task_id)
