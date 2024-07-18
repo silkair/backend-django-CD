@@ -21,20 +21,20 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 @swagger_auto_schema(method='post',
-    operation_id= 'AI 배경 이미지 재생성',
+    operation_id='AI 배경 이미지 재생성',
     operation_description='AI 배경 이미지를 재생성합니다.',
     tags=['Recreated Background'],
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={
-            'concept_option' : openapi.Schema(type=openapi.TYPE_OBJECT, description='Concept Option', properties={
-            'category': openapi.Schema(type=openapi.TYPE_STRING, description='Category',enum=['cosmetics', 'food', 'clothes', 'person', 'car', 'others']),
-            'theme': openapi.Schema(type=openapi.TYPE_STRING, description='Theme'),
-            'num_results': openapi.Schema(type=openapi.TYPE_INTEGER, description='Number of Results', minimum=1, maximum=4)
-        }),
-    },
-    required=['coception_option']
-),
+            'concept_option': openapi.Schema(type=openapi.TYPE_OBJECT, description='Concept Option', properties={
+                'category': openapi.Schema(type=openapi.TYPE_STRING, description='Category', enum=['cosmetics', 'food', 'clothes', 'person', 'car', 'others']),
+                'theme': openapi.Schema(type=openapi.TYPE_STRING, description='Theme'),
+                'num_results': openapi.Schema(type=openapi.TYPE_INTEGER, description='Number of Results', minimum=1, maximum=4)
+            }),
+        },
+        required=['concept_option']
+    ),
     responses={
         201: openapi.Response('Recreated Image Successfully', RecreatedBackgroundSerializer),
         400: 'Bad Request',
@@ -88,10 +88,8 @@ def recreate_background_view(request):
     data = {
         "username": settings.DRAPHART_USER_NAME,
         "gen_type": background.gen_type,
-        #"multiblob_sod": background.multiblob_sod,  # 기존 background에서 가져옴
         "output_w": background.output_w,
         "output_h": background.output_h,
-        #"bg_color_hex_code": background.bg_color_hex_code,  # 기존 background에서 가져옴
         'concept_option': json.dumps(concept_option),
     }
 
@@ -122,8 +120,7 @@ def recreate_background_view(request):
 
     except Exception as e:
         logger.error("Error uploading to S3: %s", e)
-        return Response({"error": "Failed to upload image to S3", "details": str(e)},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"error": "Failed to upload image to S3", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # RecreatedBackground 모델에 저장
     recreated_background = RecreatedBackground.objects.create(
@@ -159,11 +156,13 @@ def recreate_background_view(request):
 @api_view(['GET', 'DELETE'])
 def recreated_background_manage(request, recreated_background_id):
     try:
+        # 재생성된 배경 이미지 객체를 가져옴
         recreated_background = RecreatedBackground.objects.get(id=recreated_background_id)
     except RecreatedBackground.DoesNotExist:
         return Response({"error": "해당 재생성된 배경 이미지가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "GET":
+        # 재생성된 배경 이미지를 직렬화하여 반환
         serializer = RecreatedBackgroundSerializer(recreated_background)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -171,10 +170,12 @@ def recreated_background_manage(request, recreated_background_id):
         s3 = boto3.client('s3', region_name=settings.AWS_S3_REGION_NAME)
         file_key = recreated_background.image_url.split('/')[-1]
         try:
+            # S3에서 파일 삭제
             s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=file_key)
         except Exception as e:
             logger.error("S3 파일 삭제 오류: %s", e)
             return Response({"error": "S3 파일 삭제 오류", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+        # 재생성된 배경 이미지 객체 삭제
         recreated_background.delete()
         return Response({"message": "Image deleted successfully."}, status=status.HTTP_200_OK)

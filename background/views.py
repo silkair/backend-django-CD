@@ -23,8 +23,10 @@ logger = logging.getLogger(__name__)
 # Redis 클라이언트 설정
 redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
 
+# 허용된 이미지 생성 유형
 GEN_TYPES = ['remove_bg', 'color_bg', 'simple', 'concept']
 
+# Swagger를 사용하여 API 문서화
 @swagger_auto_schema(method='post',
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
@@ -50,6 +52,7 @@ GEN_TYPES = ['remove_bg', 'color_bg', 'simple', 'concept']
 )
 @api_view(['POST'])
 def backgrounds_view(request):
+    # 요청 데이터에서 필요한 정보 추출
     user_id = request.data.get('user_id')
     image_id = request.data.get('image_id')
     gen_type = request.data.get('gen_type')
@@ -57,24 +60,28 @@ def backgrounds_view(request):
     output_w = request.data.get('output_w', 1000)
     concept_option = request.data.get('concept_option', {})
 
+    # 필수 필드 확인
     if not (user_id and image_id and gen_type):
         return Response({"error": "user_id, image_id, and gen_type are required"}, status=status.HTTP_400_BAD_REQUEST)
 
+    # 유효한 gen_type 확인
     if gen_type not in GEN_TYPES:
         return Response({"error": f"gen_type is invalid. 가능한 값 : {', '.join(GEN_TYPES)}"},
                         status=status.HTTP_400_BAD_REQUEST)
 
+    # 사용자 존재 여부 확인
     try:
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return Response({"error": "사용자 없음"}, status=status.HTTP_404_NOT_FOUND)
 
+    # 이미지 존재 여부 확인
     try:
         image = Image.objects.get(id=image_id)
     except Image.DoesNotExist:
         return Response({"error": "이미지 없음"}, status=status.HTTP_404_NOT_FOUND)
 
-    # UUID 미리 생성
+    # UUID 생성 및 S3 URL 설정
     unique_filename = f"{uuid.uuid4()}.png"
     s3_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{unique_filename}"
     redis_client.set(f'background_image_url_{image_id}', s3_url)
@@ -82,10 +89,12 @@ def backgrounds_view(request):
     # 로그 추가
     logger.info(f"Temporary S3 URL for image_id {image_id}: {s3_url}")
 
+    # 비동기 작업으로 배경 이미지 생성
     task = generate_background_task.delay(user_id, image_id, gen_type, output_w, output_h, concept_option, unique_filename)
 
     return Response({"task_id": task.id, "s3_url": s3_url}, status=status.HTTP_202_ACCEPTED)
 
+# Swagger를 사용하여 생성된 이미지 조회, 수정, 삭제 API 문서화
 @swagger_auto_schema(
     method='get',
     operation_id='생성된 이미지 조회',
@@ -119,17 +128,19 @@ def backgrounds_view(request):
 )
 @api_view(['GET', 'PUT', 'DELETE'])
 def background_manage(request, background_id):
+    # 배경 이미지 존재 여부 확인
     try:
         background = Background.objects.get(id=background_id)
     except Background.DoesNotExist:
         return Response({"error": "해당 배경 이미지가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "GET":
+        # 배경 이미지 조회
         serializer = BackgroundSerializer(background)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
-        # 기존의 데이터를 사용하여 새로운 이미지를 생성
+        # 배경 이미지 수정
         user = background.user
         image = background.image
         gen_type = background.gen_type
@@ -142,7 +153,7 @@ def background_manage(request, background_id):
         output_w = background.output_w
         output_h = background.output_h
 
-        # 이미지 테이블에 있는 사용자가 업로드한 사진의 URL을 다운로드
+        # 이미지 URL에서 이미지 다운로드
         image_url = image.image_url
         try:
             image_response = requests.get(image_url)
@@ -153,7 +164,7 @@ def background_manage(request, background_id):
             logger.error("Failed to download image: %s", e)
             return Response({"error": "Failed to download image"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # API 호출 준비
+        # Draph.art API 호출 준비
         url = "https://api.draph.art/v1/generate/"
         headers = {'Authorization': f'Bearer {settings.DRAPHART_API_KEY}'}
 
@@ -213,7 +224,7 @@ def background_manage(request, background_id):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'DELETE':
-        # S3에서 파일 삭제
+        # 배경 이미지 삭제
         s3 = boto3.client('s3', region_name=settings.AWS_S3_REGION_NAME)
         file_key = background.image_url.split('/')[-1]
         try:
