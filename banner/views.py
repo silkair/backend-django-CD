@@ -211,9 +211,9 @@ def create_banner(request):
     }
 )
 @api_view(['GET', 'PUT', 'DELETE'])
-def handle_banner(request, banner_id):
+def handle_banner(request, bannerId):
     try:
-        banner = Banner.objects.get(id=banner_id)  # 배너 ID로 배너 객체를 조회
+        banner = Banner.objects.get(id=bannerId)  # 배너 ID로 배너 객체를 조회
     except Banner.DoesNotExist:
         return Response({"code": 404, "message": "배너 조회 실패"}, status=status.HTTP_404_NOT_FOUND)
 

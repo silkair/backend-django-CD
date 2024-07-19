@@ -127,10 +127,10 @@ def backgrounds_view(request):
     }
 )
 @api_view(['GET', 'PUT', 'DELETE'])
-def background_manage(request, background_id):
+def background_manage(request, backgroundId):
     # 배경 이미지 존재 여부 확인
     try:
-        background = Background.objects.get(id=background_id)
+        background = Background.objects.get(id=backgroundId)
     except Background.DoesNotExist:
         return Response({"error": "해당 배경 이미지가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 

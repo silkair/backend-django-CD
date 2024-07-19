@@ -55,7 +55,7 @@ def create_nickname(request, *args, **kwargs):
     tags=['Users'],
 )
 @api_view(['GET'])
-def get_nickname(request, user_id):
-    user_nickname = User.objects.get(id=user_id).nickname
+def get_nickname(request, userId):
+    user_nickname = User.objects.get(id=userId).nickname
     return Response({"success": "사용자가 성공적으로 조회되었습니다.", "data": { "nickname": user_nickname}},
                     status=status.HTTP_201_CREATED)

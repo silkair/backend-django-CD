@@ -111,6 +111,8 @@ def resize_background_image_view(request):
         404: 'Not Found',
         500: 'Internal Server Error'
     }
+
+
 )
 @api_view(['POST'])
 def resize_recreated_background_image_view(request):
@@ -187,10 +189,10 @@ def resize_recreated_background_image_view(request):
     }
 )
 @api_view(['GET', 'DELETE'])
-def background_image_manage(request, resizing_id):
+def background_image_manage(request, resizingId):
     try:
         # 이미지 리사이징 객체를 가져옴
-        image_resizing = ImageResizing.objects.get(id=resizing_id)
+        image_resizing = ImageResizing.objects.get(id=resizingId)
     except ImageResizing.DoesNotExist:
         return Response({"error": "해당 이미지가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -236,10 +238,10 @@ def background_image_manage(request, resizing_id):
     }
 )
 @api_view(['GET', 'DELETE'])
-def recreated_background_image_manage(request, recreated_background_image_id):
+def recreated_background_image_manage(request, resizings_recreatedId):  # 여기에서 인자 이름을 변경
     try:
         # 이미지 리사이징 객체를 가져옴
-        image_resizing = ImageResizing.objects.get(id=recreated_background_image_id)
+        image_resizing = ImageResizing.objects.get(id=resizings_recreatedId)  # 여기에서 인자 이름을 변경
     except ImageResizing.DoesNotExist:
         return Response({"error": "해당 이미지가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 
