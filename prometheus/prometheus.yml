@@ -27,10 +27,3 @@ scrape_configs:
     # cAdvisor 모니터링 대상 설정
     static_configs:
       - targets: ['cadvisor:8080']
-
-  - job_name: 'django'
-    # Django 애플리케이션 모니터링 대상 설정
-    static_configs:
-      - targets: ['localhost:8000']
-    # Django 메트릭 경로 설정
-    metrics_path: '/metrics/'
