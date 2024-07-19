@@ -17,7 +17,7 @@ class ImageSerializer(serializers.ModelSerializer):
         """
         파일의 유효성을 검사합니다.
         """
-        logger.debug("Uploaded file: ", value.name)
+        logger.debug("Uploaded file: %s", value.name)
         if not value.name.lower().endswith(('png', 'jpg', 'jpeg', 'gif')):
             raise serializers.ValidationError('유효하지 않은 파일 형식입니다. PNG, JPG, JPEG 또는 GIF 파일을 업로드하세요.')
         return value
@@ -27,6 +27,12 @@ class ImageSerializer(serializers.ModelSerializer):
         user_id = validated_data.pop('user_id')
         validated_data['user_id'] = user_id
 
-        validated_data.pop('file')  # file 필드를 제거하여 모델에 저장하지 않도록 한다! 쓰고 모델엔 필요가 없음
+        validated_data.pop('file')  # file 필드를 제거하여 모델에 저장하지 않도록 한다
 
         return super().create(validated_data)
+
+# 새로운 시리얼라이저 정의
+class ImageDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = ['id', 'image_url']

@@ -68,6 +68,7 @@ services:
       - redis
     command: celery -A backend worker --loglevel=info --uid=nobody
 
+
   prometheus:
     image: prom/prometheus:latest  # Prometheus 이미지
     container_name: prometheus  # Prometheus 컨테이너 이름

@@ -1,3 +1,4 @@
+# views.py
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, serializers
 from rest_framework.decorators import api_view, parser_classes
@@ -8,7 +9,7 @@ from django.conf import settings
 import logging
 import base64
 from .models import Image
-from .serializers import ImageSerializer
+from .serializers import ImageSerializer, ImageDetailSerializer
 from .tasks import upload_image_to_s3
 
 # 로깅 설정
@@ -38,7 +39,7 @@ def upload_image(request, *args, **kwargs):
         serializer.is_valid(raise_exception=True)
     except serializers.ValidationError as e:
         # 유효성 검증 오류 로그 기록
-        logger.error("Validation error: ", e)
+        logger.error("Validation error: %s", e)
         error_message = {
             "error": e.detail,
         }
@@ -71,7 +72,7 @@ def upload_image(request, *args, **kwargs):
     operation_description='이미지를 조회합니다.',
     tags=['Images'],
     responses={
-        200: ImageSerializer,
+        200: ImageDetailSerializer,  # 응답에 ImageDetailSerializer 사용
         404: "Image not found.",
     }
 )
@@ -99,7 +100,7 @@ def image_manage(request, image_id):
 
     if request.method == 'GET':
         # 이미지 객체를 시리얼라이즈
-        serializer = ImageSerializer(image)
+        serializer = ImageDetailSerializer(image)  # ImageDetailSerializer 사용
         # 성공 응답
         return Response({"success": "이미지가 성공적으로 조회되었습니다.", "data": serializer.data}, status=status.HTTP_200_OK)
 

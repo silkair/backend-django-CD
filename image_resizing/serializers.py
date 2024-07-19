@@ -6,7 +6,7 @@ class BackgroundImageResizingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ImageResizing
-        fields = ['width', 'height', 'background_id', 'image_url', 'created_at', 'updated_at']
+        fields = ['background_id', 'image_url']
         read_only_fields = ['image_url', 'created_at', 'updated_at']
 
     def to_representation(self, instance):
@@ -18,8 +18,9 @@ class RecreatedBackgroundImageResizingSerializer(serializers.ModelSerializer):
     recreated_background_id = serializers.IntegerField()
 
     class Meta:
+
         model = ImageResizing
-        fields = ['width', 'height', 'recreated_background_id', 'image_url', 'created_at', 'updated_at']
+        fields = ['recreated_background_id', 'image_url']
         read_only_fields = ['image_url', 'created_at', 'updated_at']
 
     def to_representation(self, instance):

@@ -19,7 +19,6 @@ import logging
 # 로깅 설정
 logger = logging.getLogger(__name__)
 
-
 # 배경 이미지를 리사이징하는 API 엔드포인트
 @swagger_auto_schema(
     method='post',
@@ -188,10 +187,10 @@ def resize_recreated_background_image_view(request):
     }
 )
 @api_view(['GET', 'DELETE'])
-def background_image_manage(request, background_image_id):
+def background_image_manage(request, resizing_id):
     try:
         # 이미지 리사이징 객체를 가져옴
-        image_resizing = ImageResizing.objects.get(id=background_image_id)
+        image_resizing = ImageResizing.objects.get(id=resizing_id)
     except ImageResizing.DoesNotExist:
         return Response({"error": "해당 이미지가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 
