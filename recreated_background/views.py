@@ -154,10 +154,10 @@ def recreate_background_view(request):
     }
 )
 @api_view(['GET', 'DELETE'])
-def recreated_background_manage(request, recreated_background_id):
+def recreated_background_manage(request, recreated_backgroundId):
     try:
         # 재생성된 배경 이미지 객체를 가져옴
-        recreated_background = RecreatedBackground.objects.get(id=recreated_background_id)
+        recreated_background = RecreatedBackground.objects.get(id=recreated_backgroundId)
     except RecreatedBackground.DoesNotExist:
         return Response({"error": "해당 재생성된 배경 이미지가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 

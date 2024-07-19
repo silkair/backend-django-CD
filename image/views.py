@@ -87,13 +87,13 @@ def upload_image(request, *args, **kwargs):
     }
 )
 @api_view(['GET', 'DELETE'])
-def image_manage(request, image_id):
+def image_manage(request, imageId):
     """
     이미지 조회 및 삭제 뷰셋
     """
     # 이미지 객체를 데이터베이스에서 가져옴
     try:
-        image = Image.objects.get(id=image_id)
+        image = Image.objects.get(id=imageId)
     except Image.DoesNotExist:
         # 이미지가 없으면 404 응답
         return Response({"error": "해당 이미지를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
