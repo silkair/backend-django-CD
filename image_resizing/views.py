@@ -19,6 +19,7 @@ import logging
 # 로깅 설정
 logger = logging.getLogger(__name__)
 
+
 # 배경 이미지를 리사이징하는 API 엔드포인트
 @swagger_auto_schema(
     method='post',
@@ -111,8 +112,6 @@ def resize_background_image_view(request):
         404: 'Not Found',
         500: 'Internal Server Error'
     }
-
-
 )
 @api_view(['POST'])
 def resize_recreated_background_image_view(request):
@@ -189,10 +188,10 @@ def resize_recreated_background_image_view(request):
     }
 )
 @api_view(['GET', 'DELETE'])
-def background_image_manage(request, resizingId):
+def background_image_manage(request, background_image_id):
     try:
         # 이미지 리사이징 객체를 가져옴
-        image_resizing = ImageResizing.objects.get(id=resizingId)
+        image_resizing = ImageResizing.objects.get(id=background_image_id)
     except ImageResizing.DoesNotExist:
         return Response({"error": "해당 이미지가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -238,10 +237,10 @@ def background_image_manage(request, resizingId):
     }
 )
 @api_view(['GET', 'DELETE'])
-def recreated_background_image_manage(request, resizings_recreatedId):  # 여기에서 인자 이름을 변경
+def recreated_background_image_manage(request, recreated_background_image_id):
     try:
         # 이미지 리사이징 객체를 가져옴
-        image_resizing = ImageResizing.objects.get(id=resizings_recreatedId)  # 여기에서 인자 이름을 변경
+        image_resizing = ImageResizing.objects.get(id=recreated_background_image_id)
     except ImageResizing.DoesNotExist:
         return Response({"error": "해당 이미지가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 
