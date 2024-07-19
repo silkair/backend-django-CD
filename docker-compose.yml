@@ -32,6 +32,18 @@ services:
       python manage.py migrate &&
       gunicorn -w 4 -b 0.0.0.0:8000 backend.wsgi:application"  # 백엔드 애플리케이션 실행 명령
 
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - backend
+
   rabbitmq:
     image: "rabbitmq:3-management"  # RabbitMQ 이미지
     container_name: rabbitmq  # RabbitMQ 컨테이너 이름
