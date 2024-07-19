@@ -9,7 +9,10 @@ class BannerSerializer(serializers.ModelSerializer):
 class BannerDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Banner
-        fields = ['id', 'ad_text', 'serve_text', 'ad_text2', 'serve_text2']
+
+
+        fields = ['id', 'maintext', 'servetext', 'maintext2', 'servetext2', 'image_id', 'user_id']
+
 
 class BannerUpdateSerializer(serializers.ModelSerializer):
     class Meta:
