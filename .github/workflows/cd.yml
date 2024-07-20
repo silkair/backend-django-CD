@@ -38,9 +38,7 @@ jobs:
           cd /home/ubuntu/backend-django
           # 기존 Docker Compose 서비스 종료
           docker-compose down
-          
-          git pull origin develop
-          
+                  
           # Docker Compose를 사용하여 새로운 컨테이너를 빌드하고 실행
           docker-compose up --build -d
           EOF
