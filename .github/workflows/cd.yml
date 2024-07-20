@@ -22,9 +22,9 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}  # GitHub Secrets에 저장된 SSH 키 사용
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}  # GitHub Secrets에 저장된 SSH 키 사용wertwertwertwertw
 
-      # 파일을 EC2 인스턴스로 복사
+      # 파일을 EC2 인스턴스로 복사werwertwertw
       - name: Copy Files to EC2
         run: |
           scp -o StrictHostKeyChecking=no -r * ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/backend-django
