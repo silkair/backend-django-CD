@@ -9,14 +9,17 @@ from elasticsearch import Elasticsearch
 pymysql.install_as_MySQLdb()
 
 # 현재 파일의 부모 디렉토리로 설정
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent  # 변경된 부분: 부모 디렉토리를 올바르게 설정
 
 # .env 파일 경로 설정
-env_file = os.path.join(BASE_DIR, '.env')
+env_file = os.path.join(BASE_DIR, 'backend', '.env')  # 변경된 부분: .env 파일 경로 지정
 
 # 환경 변수를 설정
 env = environ.Env()
-env.read_env(env_file)
+
+# .env 파일을 UTF-8로 읽기
+with open(env_file, 'r', encoding='utf-8') as f:
+    env.read_env(f)
 
 # Django의 SECRET_KEY 및 OpenAI API 키 설정
 SECRET_KEY = env('SECRET_KEY')
@@ -220,7 +223,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/app/logs/debug.log',  # 로그 파일 경로
+            'filename': os.path.join(BASE_DIR, 'logs', 'debug.log'),  # 로그 파일 경로
             'formatter': 'verbose',
             'maxBytes': 1024 * 1024 * 5,  # 5 MB
             'backupCount': 5,  # 백업 파일 수
@@ -240,3 +243,5 @@ LOGGING = {
         },
     },
 }
+
+

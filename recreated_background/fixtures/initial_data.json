@@ -1,0 +1,14 @@
+[
+  {
+    "model": "recreated_background.recreatedbackground",
+    "pk": 1,
+    "fields": {
+      "background": 1,
+      "concept_option": "{'category': 'food', 'theme': 'winter', 'num_results': 1}",
+      "image_url": "http://summerteamf.s3.ap-northeast-2.amazonaws.com/e2dabc62-f770-4eee-9b21-81791156b6f9.png",
+      "created_at": "2024-07-20T12:00:00Z",
+      "updated_at": "2024-07-20T12:00:00Z",
+      "is_deleted": false
+    }
+  }
+]
