@@ -33,7 +33,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
           # EC2 인스턴스의 지정된 디렉토리로 이동
-          cd /home/ubuntu/your_project_dir
+          cd /home/ubuntu/backend-django
           # 기존 Docker Compose 서비스 종료
           docker-compose down
           # Docker Compose를 사용하여 새로운 컨테이너를 빌드하고 실행
