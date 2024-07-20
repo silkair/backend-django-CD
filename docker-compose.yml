@@ -33,13 +33,15 @@ services:
       gunicorn -w 4 -b 0.0.0.0:8000 backend.wsgi:application"  # 백엔드 애플리케이션 실행 명령
 
   nginx:
-    build: ./nginx
     container_name: nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     ports:
       - "80:80"
-      - "443:443"
     volumes:
-      - ./nginx/logs:/var/log/nginx
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf # 호스트의 nginx 폴더와 컨테이너의 /etc/nginx/conf.d 폴더를 공유
+    restart: always  # 컨테이너 자동 재시작 설정
     depends_on:
       - backend
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
