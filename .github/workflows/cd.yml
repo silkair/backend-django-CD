@@ -1,0 +1,46 @@
+# GitHub Actions workflow 이름 설정
+name: Django CD
+
+# workflow가 실행될 조건 설정
+on:
+  push:
+    branches:
+      - develop  # develop 브랜치에 푸시될 때 실행
+
+# jobs 섹션: 각 작업(job)을 정의
+jobs:
+  deploy:  # 배포 작업 정의
+    runs-on: ubuntu-latest  # 작업이 실행될 환경 설정 (Ubuntu 최신 버전)
+
+    steps:  # 작업 단계 정의
+      # 코드 체크아웃 단계: 현재 저장소의 코드를 가져옴
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # SSH 설정 단계: 원격 서버에 접근하기 위한 SSH 키 설정 해주어ㅜ어ㅓ어
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}  # GitHub Secrets에 저장된 SSH 키 사용
+
+      # 파일을 EC2 인스턴스로 복사asdfasdfasdfasdfasdasf
+      - name: Copy Files to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no -r * ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/your_project_dir
+          # StrictHostKeyChecking 옵션을 비활성화하고 모든 파일을 EC2 인스턴스의 지정된 디렉토리에 복사
+      # SSH를 통해 EC2 인스턴스에 접속하여 배포 작업 실행asdfasdf
+      - name: SSH and Deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+          # EC2 인스턴스의 지정된 디렉토리로 이동
+          cd /home/ubuntu/your_project_dir
+          # 기존 Docker Compose 서비스 종료
+          docker-compose down
+          # Docker Compose를 사용하여 새로운 컨테이너를 빌드하고 실행
+          docker-compose up --build -d
+          EOF
+
+
+
+
+
