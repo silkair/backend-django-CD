@@ -21,6 +21,7 @@
         "pk": 2,
         "fields": {
             "user": 2,
+
             "image": 2,
             "gen_type": "concept",
             "concept_option": {"category": "food", "theme": "spring", "num_results": 1},
