@@ -30,7 +30,7 @@ jobs:
           scp -o StrictHostKeyChecking=no -r * ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/backend-django
           # StrictHostKeyChecking 옵션을 비활성화하고 모든 파일을 EC2 인스턴스의 지정된 디렉토리에 복사
 
-      # SSH를 통해 EC2 인스턴스에 접속하여 배포 작업 실행
+      # SSH를 통해 EC2 인스턴스에 접속하여 배포 작업 실행dddddd
       - name: SSH and Deploy
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
