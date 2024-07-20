@@ -1,49 +1,62 @@
-# GitHub Actions workflow 이름 설정
 name: Django CD
 
-# workflow가 실행될 조건 설정
 on:
-  workflow_run:
-    workflows: ["Django CI"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-# jobs 섹션: 각 작업(job)을 정의
 jobs:
-  deploy:  # 배포 작업 정의
-    runs-on: ubuntu-latest  # 작업이 실행될 환경 설정 (Ubuntu 최신 버전)
+  deploy:
+    runs-on: ubuntu-latest
 
-    steps:  # 작업 단계 정의
-      # 코드 체크아웃 단계: 현재 저장소의 코드를 가져옴
+    steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # SSH 설정 단계: 원격 서버에 접근하기 위한 SSH 키 설정 해주어ㅜ어ㅓ어
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}  # GitHub Secrets에 저장된 SSH 키 사용wertwertwertwertw
+          ssh-private-key: ${{ secrets.EC2_KEY }}
 
-      # 파일을 EC2 인스턴스로 복사werwertwertw
-      - name: Copy Files to EC2
+      - name: Set up Docker Compose on EC2
         run: |
-          scp -o StrictHostKeyChecking=no -r * ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/backend-django
-          # StrictHostKeyChecking 옵션을 비활성화하고 모든 파일을 EC2 인스턴스의 지정된 디렉토리에 복사
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+          mkdir -p /home/${{ secrets.EC2_USER }}/app &&
+          cd /home/${{ secrets.EC2_USER }}/app &&
+          echo 'MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}' > .env &&
+          echo 'DATABASE_NAME=${{ secrets.DATABASE_NAME }}' >> .env &&
+          echo 'DATABASE_USER=${{ secrets.DATABASE_USER }}' >> .env &&
+          echo 'DATABASE_PASS=${{ secrets.DATABASE_PASS }}' >> .env &&
+          echo \"SECRET_KEY='${{ secrets.SECRET_KEY }}'\" >> .env &&
+          echo 'AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}' >> .env &&
+          echo 'AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}' >> .env &&
+          echo 'AWS_S3_REGION_NAME=${{ secrets.AWS_S3_REGION_NAME }}' >> .env &&
+          echo 'AWS_STORAGE_BUCKET_NAME=${{ secrets.AWS_STORAGE_BUCKET_NAME }}' >> .env
+          "
 
-      # SSH를 통해 EC2 인스턴스에 접속하여 배포 작업 실행dddddd
-      - name: SSH and Deploy
+      - name: Copy Docker Compose file and NGINX config to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
-          # EC2 인스턴스의 지정된 디렉토리로 이동
-          cd /home/ubuntu/backend-django
-          # 기존 Docker Compose 서비스 종료
-          docker-compose down
-                  
-          # Docker Compose를 사용하여 새로운 컨테이너를 빌드하고 실행
-          docker-compose up --build -d
-          EOF
+          scp -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/app/
+          scp -o StrictHostKeyChecking=no nginx/nginx.conf ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/app/nginx/
 
+      - name: Deploy to Blue environment on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+          cd /home/${{ secrets.EC2_USER }}/app &&
+          docker-compose up -d --build backend-blue &&
+          docker-compose exec nginx nginx -s reload
+          "
 
+      - name: Wait for Blue environment to be ready
+        run: sleep 60
 
-
-
+      - name: Deploy to Green environment on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+          cd /home/${{ secrets.EC2_USER }}/app &&
+          docker-compose up -d --build backend-green &&
+          docker-compose exec nginx nginx -s reload
+          "
