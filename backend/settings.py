@@ -154,6 +154,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS 설정
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 # AWS S3 설정
 AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
