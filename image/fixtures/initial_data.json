@@ -1,0 +1,25 @@
+[
+    {
+        "model": "image.image",
+        "pk": 1,
+        "fields": {
+            "user": 1,
+            "created_at": "2024-07-20T12:00:00Z",
+            "updated_at": "2024-07-20T12:00:00Z",
+            "is_deleted": false,
+            "image_url": "https://www.sisa-news.com/data/photos/20201253/art_160932199756_079bcc.jpg"
+        }
+    },
+    {
+        "model": "image.image",
+        "pk": 2,
+        "fields": {
+            "user": 2,
+            "created_at": "2024-07-20T12:00:00Z",
+            "updated_at": "2024-07-20T12:00:00Z",
+            "is_deleted": false,
+            "image_url": "https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNDA0MjlfNjAg%2FMDAxNzE0MzY0MTA1MzYz.3hheHHn98dz37e0PfcUpgpywWqgiNi-NsSBfNqc0g14g.Dk8kip0oFuJNDtMu6CYlqFKlrSANF_blUdnpxhlZe_gg.JPEG%2FM21A7057-crop.JPG&type=sc960_832"
+        }
+    }
+]
+

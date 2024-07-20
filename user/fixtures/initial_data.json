@@ -1,0 +1,22 @@
+[
+    {
+        "model": "user.user",
+        "pk": 1,
+        "fields": {
+            "nickname": "chaeeun",
+            "created_at": "2024-07-20T12:00:00Z",
+            "updated_at": "2024-07-20T12:00:00Z",
+            "is_deleted": false
+        }
+    },
+    {
+        "model": "user.user",
+        "pk": 2,
+        "fields": {
+            "nickname": "silkair",
+            "created_at": "2024-07-20T12:00:00Z",
+            "updated_at": "2024-07-20T12:00:00Z",
+            "is_deleted": false
+        }
+    }
+]

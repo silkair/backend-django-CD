@@ -1,0 +1,58 @@
+[
+  {
+    "model": "banner.banner",
+    "pk": 1,
+    "fields": {
+      "image_id": 1,
+      "user_id": 1,
+      "item_name": "화장품",
+      "item_concept": "촉촉한",
+      "item_category": "피부에 광이 나는",
+      "maintext": "촉촉한 피부에 광이 나는 화장품,",
+      "servetext": "촉촉한 피부, 빛나는 아름다움. 하루종일 가성비 갑!",
+      "maintext2": "피부에 광이 나는 촉촉한 화장품",
+      "servetext2":  "하루종일 지속되는 촉촉함, 피부에 광이 나는 비밀이 ",
+      "add_information": "하루종일 지속되는 가성비 갑",
+      "created_at": "2024-07-20T12:00:00Z",
+      "updated_at": "2024-07-20T12:00:00Z",
+      "is_deleted": false
+    }
+  },
+  {
+    "model": "banner.banner",
+    "pk": 2,
+    "fields": {
+      "image_id": 2,
+      "user_id": 2,
+      "item_name": "스파게티",
+      "item_concept": "남녀노소 좋아하는",
+      "item_category": "단 돈 5천원의 맛",
+      "maintext": "5천원의 진한 풍미, 남녀노소 모두",
+      "servetext": "'즐거운 이론 증명', 5천원뿐.",
+      "maintext2": "5천원으로 누구나 즐기는 진한 맛,",
+      "servetext2": "'행복한 여운, 5천원의 향연.'",
+      "add_information": "소스의 진한 풍미",
+      "created_at": "2024-07-20T13:00:00Z",
+      "updated_at": "2024-07-20T13:00:00Z",
+      "is_deleted": false
+    }
+  },
+  {
+    "model": "banner.userinteraction",
+    "pk": 1,
+    "fields": {
+      "image_id": 1,
+      "interaction_data": "User interaction data for Image1",
+      "created_at": "2024-07-20T12:00:00Z"
+    }
+  },
+  {
+    "model": "banner.userinteraction",
+    "pk": 2,
+    "fields": {
+      "image_id": 2,
+      "interaction_data": "User interaction data for Image2",
+      "created_at": "2024-07-20T13:00:00Z"
+    }
+  }
+]

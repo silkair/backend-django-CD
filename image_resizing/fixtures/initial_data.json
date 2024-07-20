@@ -1,0 +1,16 @@
+[
+  {
+    "model": "image_resizing.imageresizing",
+    "pk": 2,
+    "fields": {
+      "width": 2345,
+      "height": 1987,
+      "background": null,
+      "recreated_background": 1,
+      "image_url": "http://summerteamf.s3.ap-northeast-2.amazonaws.com/27f7bb1d-5d57-4a89-8202-2c7a045eab53.png",
+      "created_at": "2024-07-20T13:00:00Z",
+      "updated_at": "2024-07-20T13:00:00Z",
+      "is_deleted": false
+    }
+  }
+]
